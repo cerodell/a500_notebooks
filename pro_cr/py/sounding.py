@@ -15,11 +15,12 @@ import metpy.calc as mpcalc
 from metpy.plots import Hodograph, SkewT
 from metpy.units import units
 
+import context
 
-user      = 'rodell'
+#user      = 'rodell'
 
-file = 'KDNR_20160831_00UTC_sharppy.txt'
-filein  = '/Users/'+user+'/Google Drive File Stream/Shared drives/Research/CRodell/BL/Data/'
+file = 'sounding/KDNR_20160831_00UTC_sharppy.txt'
+#filein  = '/Users/'+user+'/Google Drive File Stream/Shared drives/Research/CRodell/BL/Data/'
 #save    = '/Users/'+user+'/Google Drive File Stream/Shared drives/Research/CRodell/BL/Images/'
 
 
@@ -33,7 +34,7 @@ title_size = 16
 
 
 "######################  Read File ######################"
-df_sonde = pd.read_csv(filein+file).replace(-9999, np.NaN, regex=True)
+df_sonde = pd.read_csv(context.pro_data_dir / file).replace(-9999, np.NaN, regex=True)
 
 #df_sonde = df_sonde.replace(r'  ', np.NaN, regex=True)
 ##Make a list of foats of each variable 
@@ -67,11 +68,11 @@ wsp, wdir = wsp*units.knots, wdir*units.degrees
 ##Calcualte u and v
 u, v = mpcalc.wind_components(wsp, wdir)
 
-print(tempC[index:])
+#print(tempC[index:])
 ##Calculate the LCL
 lcl_pressure, lcl_temperature = mpcalc.lcl(the_press[index], tempC[index], dew[index])
 
-print(lcl_pressure, lcl_temperature)
+#print(lcl_pressure, lcl_temperature)
 
 ##Calculate the parcel profile.
 parcel_prof = mpcalc.parcel_profile(the_press, tempC[index], dew[index]).to('degC')

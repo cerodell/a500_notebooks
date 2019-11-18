@@ -5,65 +5,147 @@ Created on Fri Nov 15 14:58:20 2019
 
 @author: crodell
 """
+'''
 
+'''
 
 import urllib,os
 import context
-import bl_pro
 import pandas as pd
 from pathlib import Path
 from netCDF4 import Dataset
+from cr500.utils import download, plt_set, wind_eq
 
-#from bs4 import BeautifulSoup
-#import requests
+import numpy as np
+from bs4 import BeautifulSoup
+import requests
 
+from matplotlib import pyplot as plt
+#import matplotlib.patches as mpatches
 
-
-
+import math 
 
 #from  bl_pro.utils.data_read import download
-the_file='WC16_XPIA/WLS866-16_2015_06_07__00_00_00.rtd'
-#out=download(the_file,dest_folder=bl_pro.lidar_dir)
+#the_file='lidar/WC16_XPIA/WLS866-16_2015_06_07__00_00_00.rtd'
+
+
+the_file='lidar/WLS7-61_2015_06_07__00_00_00.sta'
+
+#out=download(the_file, dest_folder= context.pro_data_dir)
     
 #####################################################################
-##Read files
+'''######################  Read Files ############################'''
 #################################################################### 
 
-case_name= bl_pro.lidar_dir / the_file
+case_name=  context.pro_data_dir / the_file
 
 
-feilds = ['Timestamp','Position','Temperature','Wiper Count','Alpha','Beta','Gamma','40m CNR (dB)',
-     '40m Radial Wind Speed (m/s)','40m Radial Wind Speed Dispersion (m/s)','40m Wind Speed (m/s)',
-     '40m Wind Direction','40m X-wind (m/s)','40m Y-wind (m/s)','40m Z-wind (m/s)',
-     '50m CNR (dB)','50m Radial Wind Speed (m/s)','50m Radial Wind Speed Dispersion (m/s)',
-     '50m Wind Speed (m/s)','50m Wind Direction','50m X-wind (m/s)','50m Y-wind (m/s)',
-     '50m Z-wind (m/s)','60m CNR (dB)','60m Radial Wind Speed (m/s)',
-     '60m Radial Wind Speed Dispersion (m/s)','60m Wind Speed (m/s)','60m Wind Direction',
-     '60m X-wind (m/s)','60m Y-wind (m/s)','60m Z-wind (m/s)','80m CNR (dB)','80m Radial Wind Speed (m/s)',
-     '80m Radial Wind Speed Dispersion (m/s)','80m Wind Speed (m/s)',
-     '80m Wind Direction','80m X-wind (m/s)','80m Y-wind (m/s)', '80m Z-wind (m/s)','100m CNR (dB)','100m Radial Wind Speed (m/s)',
-     '100m Radial Wind Speed Dispersion (m/s)','100m Wind Speed (m/s)',
-     '100m Wind Direction','100m X-wind (m/s)','100m Y-wind (m/s)','100m Z-wind (m/s)','120m CNR (dB)','120m Radial Wind Speed (m/s)',
-     '120m Radial Wind Speed Dispersion (m/s)','120m Wind Speed (m/s)',
-     '120m Wind Direction','120m X-wind (m/s)','120m Y-wind (m/s),120m Z-wind (m/s)',
-     '140m CNR (dB)','140m Radial Wind Speed (m/s)','140m Radial Wind Speed Dispersion (m/s)',
-     '140m Wind Speed (m/s)','140m Wind Direction','140m X-wind (m/s)','140m Y-wind (m/s)',
-     '140m Z-wind (m/s)','150m CNR (dB),150m Radial Wind Speed (m/s)','150m Radial Wind Speed Dispersion (m/s)',
-     '150m Wind Speed (m/s)','150m Wind Direction','150m X-wind (m/s)','150m Y-wind (m/s)','150m Z-wind (m/s)',
-     '160m CNR (dB)','160m Radial Wind Speed (m/s)','160m Radial Wind Speed Dispersion (m/s)','160m Wind Speed (m/s)',
-     '160m Wind Direction','160m X-wind (m/s)','160m Y-wind (m/s)','160m Z-wind (m/s),180m CNR (dB)','180m Radial Wind Speed (m/s)',
-     '180m Radial Wind Speed Dispersion (m/s)','180m Wind Speed (m/s)','180m Wind Direction,180m X-wind (m/s)','180m Y-wind (m/s)',
-     '180m Z-wind (m/s)','200m CNR (dB)'',200m Radial Wind Speed (m/s)','200m Radial Wind Speed Dispersion (m/s)','200m Wind Speed (m/s)',
-     '200m Wind Direction','200m X-wind (m/s)','200m Y-wind (m/s)','200m Z-wind (m/s)']
+df = pd.read_table(case_name, encoding ='ISO-8859-1',  skiprows=range(0, 56), sep = '\s+')
 
-df = pd.read_csv(case_name, encoding ='ISO-8859-1',  skiprows=range(0, 41), sep = '\s+' , names=feilds)
-#lines  = handle.readlines()
-#
-#idx = 12
-#for line in lines:
-##    entries = line.decode("utf-8").split('\t') 
-#    entries = line.split('\t')
-#    if(entries[0][0]=='D'): 
-#        print(entries[idx])
+
+
+
+
+#####################################################################
+'''######################  Make Plots ############################'''
+#################################################################### 
+
+heights = ['Vhm1','Vhm2','Vhm3','Vhm4','Vhm5','Vhm6','Vhm7','Vhm8','Vhm9','Vhm10']
+
+agl = [40, 60, 80, 100, 120, 140, 160, 180, 200, 220]
+
+
+
+fig,ax = plt.subplots(1,1,figsize=(16,8))
+fig.suptitle('Wind Profile Lidar', fontsize=plt_set.fig_size, fontweight="bold")
+
+for height in heights:  
+    ax.plot(df[f'{height}'], agl, alpha = 0.5, label = f'{height}')   
+ax.set_ylabel("Time", fontsize = plt_set.label)
+ax.set_ylabel('Wind Speed ($ms^-1$)', fontsize = plt_set.label)
+#ax.tick_params(axis='both', which='major', labelsize=plt_set.tick_size)
+#ax.xaxis.grid(color='gray', linestyle='dashed')
+#ax.yaxis.grid(color='gray', linestyle='dashed')
+ax.legend()
+ax.set_facecolor('lightgrey')
+#plt.close('all')
+
+
+
+#fig,ax = plt.subplots(1,1,figsize=(16,8))
+#fig.suptitle('Wind Profile Lidar', fontsize=plt_set.fig_size, fontweight="bold")
+
+#for height in heights:  
+#    ax.plot(df['Date'],  df[f'{height}'],alpha = 0.5, label = f'{height}')   
+#ax.set_ylabel("Time", fontsize = plt_set.label)
+#ax.set_ylabel('Wind Speed ($ms^-1$)', fontsize = plt_set.label)
+##ax.tick_params(axis='both', which='major', labelsize=plt_set.tick_size)
+##ax.xaxis.grid(color='gray', linestyle='dashed')
+##ax.yaxis.grid(color='gray', linestyle='dashed')
+#ax.legend()
+#ax.set_facecolor('lightgrey')
+#plt.close('all')
+  
+
+
+z_i = 1000
+m_bl = 8 
+
+
+u_avg,u_perturb = wind_eq.do_reynolds(df['um1'])
+v_avg,v_perturb = wind_eq.do_reynolds(df['vm1'])
+w_avg,w_perturb = wind_eq.do_reynolds(df['wm1'])    
+theta_avg,theta_perturb = wind_eq.do_reynolds(df['Tm']+273.15)    
+
+
+
+u_str = wind_eq.u_str((u_perturb*w_perturb),(v_perturb*w_perturb))
+w_str = wind_eq.w_str(theta_avg,z_i,(w_perturb*theta_perturb))
+  
+
+z = np.arange(0,1500,50)  
+
+
+m_z = []
+for i in range(len(z)):
+    m_z_i = wind_eq.RxL(w_str,u_str,z[i],z_i,m_bl)
+    m_z.append(m_z_i)
     
+    
+m_z = np.stack(m_z)
+
+
+fig,ax = plt.subplots(1,1,figsize=(16,8))
+fig.suptitle('Wind Profile Lidar', fontsize=plt_set.fig_size, fontweight="bold")
+
+
+for i in range(len(u_str)):  
+    ax.plot(m_z[:,i], z,alpha = 0.5)   
+ax.set_ylabel("Time", fontsize = plt_set.label)
+ax.set_ylabel('Wind Speed ($ms^-1$)', fontsize = plt_set.label)
+#ax.tick_params(axis='both', which='major', labelsize=plt_set.tick_size)
+#ax.xaxis.grid(color='gray', linestyle='dashed')
+#ax.yaxis.grid(color='gray', linestyle='dashed')
+ax.legend()
+ax.set_facecolor('lightgrey')
+#ax.set_ylim(0,10)
+#plt.close('all')
+
+#fig,ax = plt.subplots(1,1,figsize=(16,8))
+#fig.suptitle('Wind Profile Lidar', fontsize=plt_set.fig_size, fontweight="bold")
+#
+#
+#for i in range(len(z)):  
+#    ax.plot(df['Date'],  m_z[i,:],alpha = 0.5)   
+#ax.set_ylabel("Time", fontsize = plt_set.label)
+#ax.set_ylabel('Wind Speed ($ms^-1$)', fontsize = plt_set.label)
+##ax.tick_params(axis='both', which='major', labelsize=plt_set.tick_size)
+##ax.xaxis.grid(color='gray', linestyle='dashed')
+##ax.yaxis.grid(color='gray', linestyle='dashed')
+#ax.legend()
+#ax.set_facecolor('lightgrey')
+#ax.set_ylim(0,10)
+##plt.close('all')
+
+
 

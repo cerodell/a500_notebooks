@@ -17,7 +17,7 @@ path = Path(__file__).resolve()  # this file
 this_dir = path.parent  # this folder
 notebooks_dir = this_dir
 root_dir = notebooks_dir.parent
-data_dir = root_dir / Path("data")
+pro_data_dir = root_dir / Path('pro_data')
 test_dir = root_dir / Path("test_data")
 map_dir = root_dir / Path("map_data")
 
