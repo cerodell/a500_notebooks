@@ -11,6 +11,7 @@ def RxL(w_str,u_str,z,z_i,m_bl):
 #       m_z = m_bl
 #   else:
     m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1-dim**constants.D))
+    m_z = np.array(m_z)
     return m_z
 
 
@@ -21,7 +22,9 @@ def w_str(thetav_avg,z_i,wtheta_peturb):
     (aka Deardorff Velocity)
     '''
     w_str = ((constants.g/thetav_avg)*z_i*wtheta_peturb)**(1/3)
+    w_str = np.array(w_str)
     return w_str
+
 
 
 
@@ -30,6 +33,7 @@ def u_str(uw_peturb,vw_peturb):
     This function solves for the Friction velocity
     '''
     u_str = (uw_peturb**2 + vw_peturb**2)**(1/4)
+    u_str = np.array(u_str)
     return u_str
 
 def do_reynolds(var):
