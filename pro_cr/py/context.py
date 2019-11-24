@@ -20,6 +20,7 @@ root_dir = notebooks_dir.parent
 pro_data_dir = root_dir / Path('pro_data')
 test_dir = root_dir / Path("test_data")
 map_dir = root_dir / Path("map_data")
+g_suite_data = '/Users/rodell/Google Drive File Stream/Shared drives/Research/CRodell/atsc_500_cr_pro/data/cabauw/'
 
 sys.path.insert(0, root_dir)
 sep = "*" * 30

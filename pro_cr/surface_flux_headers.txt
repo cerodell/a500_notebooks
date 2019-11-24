@@ -1,0 +1,221 @@
+NetCDF Global Attributes:
+        institution: 'Royal Netherlands Meteorological Institute (KNMI)'
+        comment: 'none'
+        Conventions: 'CF-1.4'
+        location: 'CESAR observatory, the Netherlands'
+        file_creation_date_time: '20181122 14:55:59 (UTC)'
+        history: 'Continuous observations are performed, gap filled and archived. The data product is published in monthly intervals.'
+        references: 'cesar_surface_flux_lc1_t10_v1.0.pdf @ http://www.cesar-database.nl'
+NetCDF dimension information:
+        Name: time
+                size: 4464
+                type: dtype('float32')
+                units: 'hours since 2018-07-01 00:00:00 0:00'
+                long_name: 'hours since 2018-07-01 00:00:00 (UTC)'
+                standard_name: 'time'
+                axis: 'T'
+                bounds: 'time_bnds'
+        Name: nv
+                size: 2
+                WARNING: nv does not contain variable attributes
+        Name: day_in_time_interval
+                size: 31
+                WARNING: day_in_time_interval does not contain variable attributes
+NetCDF variable information for group root:
+        Name: iso_dataset
+                dimensions: ()
+                size: 1.0
+                type: dtype('S1')
+                hierarchyLevel: 'dataset'
+                url: 'http://www.cesar-database.nl'
+                protocol: 'website'
+                topic: 'climatologyMeteorologyAtmosphere'
+                westbound_longitude: '4.926'
+                eastbound_longitude: '4.926'
+                southbound_latitude: '51.97'
+                northbound_latitude: '51.97'
+                datasetDateType: 'publication'
+                code: '28992'
+                codeSpace: 'EPSG'
+                accessConstraints: 'CESAR data policy'
+                useLimitation: 'None'
+                organisationName_dataset: 'Royal Netherlands Meteorological Institute (KNMI)'
+                email_dataset: 'fred.bosveld@knmi.nl'
+                role_dataset: 'Principle Investigator'
+                organisationName_metadata: 'Royal Netherlands Meteorological Institute (KNMI)'
+                role_metadata: 'Principle Investigator'
+                email_metadata: 'fred.bosveld@knmi.nl'
+                url_metadata: 'http://www.knmi.nl/~bosveld'
+                metadataDateType: 'creation'
+                language: 'eng'
+                metadataStandardName: 'ISO-19115'
+                metadataStandardNameVersion: 'Nederlands profiel op ISO 19115 voor geografie, v1.2'
+                title: 'CESAR surface fluxes validated and gap filled'
+                abstract: 'Surface fluxes of net radiation, momentum, sensible heat, latent heat, soil heat and carbon dioxide at Cabauw at 10 minute time base, gap filled'
+                status: 'onGoing'
+                uid_dataset: '09814d72-1b1f-41f5-aaf0-2635d18d6673'
+                keyword: 'flux temperature humidity momentum carbon dioxide soil heat radiation'
+                temporal_extent: '2001-08-01,onGoing'
+                datasetDate: '2012-06-05'
+                statement: 'Continuous observations are performed, gap filled and archived. The data product is published in monthly intervals.'
+                metadata_id: 'd2b79a08-5c07-4111-aa41-295127349223'
+                metadataDate: '2012-06-05'
+        Name: product
+                dimensions: ()
+                size: 1.0
+                type: dtype('S1')
+                format_version: 'netCDF,3.6'
+                originator: 'Bosveld, F.C., KNMI'
+                software_version: 'see http://www.knmi.nl/~bosveld -> software -> Mobibase'
+                command_line: ' ncselect.x cabcon a10 [M]cesar,[O]cesar_surface_flux_lc1_t10_v1.0 201807 -f/nobackup/users/bosveld/temp/20181122145348282529095/cesar_surface_flux_lc1_t10_v1.0_201807.nc.tm'
+                date_start_of_data: '2018-07-01T00:00Z'
+                date_end_of_data: '2018-07-31T23:59Z'
+                revision_date: '2018-11-22'
+                ref_doc: 'cesar_surface_flux_lc1_t10_v1.0.pdf'
+                ref_doc_version: 'v1.0'
+        Name: station_details
+                dimensions: ()
+                size: 1.0
+                type: dtype('S1')
+                name: 'CESAR observatory'
+                latitude: '51.97'
+                longitude: '4.926'
+                elevation: '-0.7'
+                WMO_id: '06348'
+                address: 'Zijdeweg 1'
+                postal_code: '3411 MH'
+                city: 'Lopik'
+                administration_area: 'Utrecht'
+                country: 'the Netherlands'
+        Name: date
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('int32')
+                long_name: 'yyyymmdd'
+        Name: valid_dates
+                dimensions: ('day_in_time_interval',)
+                size: 31
+                type: dtype('int8')
+                comment: 'indicates whether any data are included for a particular day: 0=none, 1=data, index runs from date indicated by "units" attribute of the time variable'
+        Name: time_bnds
+                dimensions: ('time', 'nv')
+                size: 8928
+                type: dtype('float32')
+        Name: UST
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: 'm s-1'
+                long_name: 'MERGED Friction velocity'
+                ancillary_variables: 'IUST'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: IUST
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED Friction velocity source index'
+                _FillValue: -9999.0
+        Name: FC
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: 'mg m-2 s-1'
+                long_name: 'MERGED CO2 flux'
+                ancillary_variables: 'IFC'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: IFC
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED CO2 flux source index'
+                _FillValue: -9999.0
+        Name: H
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: 'W m-2'
+                long_name: 'MERGED Surface sensible heat flux'
+                standard_name: 'surface_upward_sensible_heat_flux'
+                accuracy: '10%'
+                ancillary_variables: 'IH'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: IH
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED Surface sensible heat flux Source index'
+                _FillValue: -9999.0
+        Name: LE
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: 'W m-2'
+                long_name: 'MERGED Surface latent heat flux'
+                standard_name: 'surface_upward_latent_heat_flux'
+                accuracy: '10%'
+                ancillary_variables: 'ILE'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: ILE
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED Surface latent heat flux Source index'
+                _FillValue: -9999.0
+        Name: G0
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: 'W m-2'
+                long_name: 'MERGED Surface soil heat flux'
+                standard_name: 'downward_heat_flux_at_ground_level_in_soil'
+                accuracy: '10%10'
+                ancillary_variables: 'IG0'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: IG0
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED Surface soil heat flux Source index'
+                _FillValue: -9999.0
+        Name: QN
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: 'W m-2'
+                long_name: 'MERGED Net radiation'
+                ancillary_variables: 'IQN'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: IQN
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED Net radiation Source index'
+                _FillValue: -9999.0
+        Name: LE2
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: 'W m-2'
+                long_name: 'Merged latent heat EC Bowen ratio'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: ILE2
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('float32')
+                units: '-'
+                long_name: 'Source of merged latent heat flux EC Bowen ratio'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'

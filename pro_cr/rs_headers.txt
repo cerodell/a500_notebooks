@@ -1,0 +1,235 @@
+NetCDF Global Attributes:
+        title: 'TARA processed multi-beam Doppler data'
+        history: 'TARA 5-pol-cycle polarimetric and wind processor: C:\\Users\\ATMOS\\Desktop\\TARA\\MATLAB\\Polawind_rt_V7'
+        institution: 'Delft University of Technology (DUT)'
+        references: 'cesar_tara_meaasurements_la1_t00_v1.0.pdf @ http://www.cesar-database.nl'
+        Conventions: 'CF-1.4'
+        location: 'CESAR observatory, the Netherlands'
+        source: 'Ground-based profiling polarimetric radar'
+NetCDF dimension information:
+        Name: scalar
+                size: 1
+                WARNING: scalar does not contain variable attributes
+        Name: time
+                size: 28670
+                type: dtype('float32')
+                standard_name: 'time'
+                units: 'hours since 2018-07-01 00:00:00 00:00'
+                axis: 'T'
+        Name: range_bin
+                size: 488
+                type: dtype('int16')
+                units: 'count'
+                comment: 'To get the height/range information (m) refer to the dimension corresponding to the time interval of data of interest.'
+                axis: 'NInterval'
+        Name: measurement_interval
+                size: 1
+                type: dtype('int16')
+                units: 'count'
+                comment: 'Measurement interval incremented when a measurement was interrupted and restarted by the radar principle investigator. Note that the height dimension, elevation, radar sensitivity etc. might change due to a change of the measurement settings. For each measurement interval, a height/slant range dimension is provided.'
+        Name: range_1st_interval
+                size: 488
+                type: dtype('float32')
+                long_name: 'slant_range'
+                cesar_standard_name: 'slant_range'
+                scan_type: 'fixed'
+                main_beam_elevation_above_horizon: 45.0
+                azimuth: 246.5
+                units: 'm'
+                comment: 'Slant range (meter) to the leading edge of the range bins. The radial extension of the range bins is provided by the variable <range_resolution>. '
+        Name: height_1st_interval
+                size: 488
+                type: dtype('float32')
+                standard_name: 'height'
+                units: 'm'
+                comment: 'Height over the radar (meter), reference: main beam. '
+NetCDF variable information for group root:
+        Name: iso_dataset
+                dimensions: ('scalar',)
+                size: 1
+                type: dtype('S1')
+                title: 'TARA processed multi-beam Doppler data'
+                statement: 'TARA 5-pol-cycle polarimetric and wind processor: C:\\Users\\ATMOS\\Desktop\\TARA\\MATLAB\\Polawind_rt_V7'
+                abstract: 'This dataset contains S-band (central frequency of 3.298 GHz) radar measurements from the TU Delft transportable atmospheric radar TARA. It includes profiles of the reflectivity. Furthermore, the horizontal wind (speed and direction) and the vertical Doppler velocity profiles are supplied derived from the profiles of Doppler moments measured in three different directions. TARA is placed at the remote sensing site at Cabauw. It is a very sensitive profiling radar providing time-height indicators.'
+                status: 'onGoing'
+                hierarchyLevel: 'dataset'
+                url: 'http://www.cesar-database.nl'
+                protocol: 'website'
+                uid_dataset: '43c7959c-0e40-4046-b429-0394b2f494da'
+                topic: 'climatologyMeteorologyAtmosphere'
+                keyword: 'Radar, Reflectivity, Doppler Velocity (vertical), Horizontal Wind (speed and direction), Precipitation, Clouds, Boundary Layer'
+                westbound_longitude: '4.929'
+                eastbound_longitude: '4.929'
+                southbound_latitude: '51.968'
+                northbound_latitude: '51.968'
+                temporal_extent: '2012-01-01,onGoing'
+                datasetDate: '2012-06-01'
+                datasetDateType: 'publication'
+                code: '28992'
+                codeSpace: 'EPSG'
+                accessConstraints: 'CESAR data policy'
+                useLimitation: 'none'
+                organisationName_dataset: 'Delft University of Technology (DUT)'
+                email_dataset: 'y.dufournet@tudelft.nl'
+                role_dataset: 'Principle Investigator'
+                metadata_id: 'cc12acc0-b9e9-11e1-afa6-0800200c9a66'
+                organisationName_metadata: 'Delft University of Technology (DUT)'
+                role_metadata: 'Principle Investigator'
+                email_metadata: 'y.dufournet@tudelft.nl'
+                url_metadata: 'http://atmos.weblog.tudelft.nl'
+                metadataDate: '2012-06-01'
+                metadataDateType: 'creation'
+                language: 'eng'
+                metadataStandardName: 'ISO-19115'
+                metadataStandardNameVersion: 'Nederlands profiel op ISO 19115 voor geografie, v1.2'
+        Name: product
+                dimensions: ('scalar',)
+                size: 1
+                type: dtype('S1')
+                date_start_of_data: '2018-07-01T00:03:18Z'
+                date_end_of_data: '2018-07-01T23:55:26Z'
+                ref_doc: 'cesar_tara_meaasurements_la1_t00_v1.0.pdf'
+                ref_doc_version: '1.0'
+                format_version: 'netCDF,4.0'
+                originator: 'Dufournet Y., DUT'
+                revision_date: '2012-06-01'
+                azimuth: 'The azimuth (degree) measured clockwise from the Geographic North Pole: 246.5'
+                antenna_beam_width: 'Half-power beam-width of the transmit and receive antennas (degree): 2.1'
+                radar_radiation_wavelength: 'Central radiation wavelength (meter): 0.091'
+                multibeam_polarimetric_measurement_cycle_1st_interval: 'VV HV HH O1 O2 '
+                receiver_low_pass_filter_1st_interval: 'Receiver low-pass filter setting (kHz): 1024'
+                delay_line_1st_interval: 'Delay line not used, i.e. standard radar operation.'
+        Name: station_details
+                dimensions: ('scalar',)
+                size: 1
+                type: dtype('S1')
+                name: 'CESAR observatory'
+                latitude: '51.97'
+                longitude: '4.926'
+                elevation: '-0.7'
+                WMO_id: '06348'
+                address: 'Zijdeweg 1'
+                postal_code: '3411 MH'
+                city: 'Lopik'
+                administration_area: 'Utrecht'
+                country: 'the Netherlands'
+        Name: radar_sensitivity
+                dimensions: ('time',)
+                size: 28670
+                type: dtype('int16')
+                units: 'percent'
+                comment: 'At 100% sensitivity, the radar is able to detect echoes due to atmospheric refractive index variations, ice and mixed-phase clouds and precipitation. Sensitivity values below 100% are a result of the optimisation of the radar dynamic range for the measurement of precipitation and strong cloud echoes. The radar sensitivity is directly related to <tx_attenuation>.'
+        Name: measurement_intervals
+                dimensions: ('time',)
+                size: 28670
+                type: dtype('int16')
+                long_name: 'measurement interval number'
+                units: 'count'
+                comment: 'The measurement interval number provides information about the height/range axes is to be used at a specific time of measurement.'
+        Name: equivalent_reflectivity_factor
+                dimensions: ('time', 'range_bin')
+                size: 13990960
+                type: dtype('int16')
+                long_name: 'co-polarised equivalent reflectivity factor at horizontal polarisation'
+                units: 'dBZ'
+                scale_factor: 0.0015230163
+                comment: 'This variable should be multiplied by the value in its <scale_factor> attribute. Co-polarised equivalent reflectivity factor at horizontal polarisation in logarithmic units (dBZ, normalised to 1 mm6 m-3).'
+                _FillValue: -32768
+        Name: vertical_velocity
+                dimensions: ('time', 'range_bin')
+                size: 13990960
+                type: dtype('int16')
+                long_name: 'vertical mean Doppler velocity'
+                units: 'm s-1'
+                scale_factor: 0.0033679057
+                comment: 'This variable should be multiplied by the value in its <scale_factor> attribute. Due to the multi-beam Doppler capabilities of TARA, the vertical mean Doppler velocity is estimated even when the radar is slant profiling.'
+                _FillValue: -32768
+        Name: horizontal_wind_speed
+                dimensions: ('time', 'range_bin')
+                size: 13990960
+                type: dtype('int16')
+                standard_name: 'wind_speed'
+                long_name: 'Horizontal wind speed'
+                units: 'm s-1'
+                scale_factor: 0.0079753995
+                comment: 'This variable should be multiplied by the value in its <scale_factor> attribute. Horizontal wind speed (m s-1) in rain and clouds.'
+                _FillValue: -32768
+        Name: horizontal_wind_direction
+                dimensions: ('time', 'range_bin')
+                size: 13990960
+                type: dtype('int16')
+                standard_name: 'wind_from_direction'
+                long_name: 'Horizontal wind direction'
+                units: 'degree'
+                scale_factor: 0.01098666
+                comment: 'This variable should be multiplied by the value in its <scale_factor> attribute. Horizontal wind direction (degree), measured clockwise from the Geographic North Pole.'
+                _FillValue: -32768
+        Name: range_resolution
+                dimensions: ('measurement_interval',)
+                size: 1
+                type: dtype('float32')
+                long_name: 'range resolution'
+                units: 'm'
+                comment: 'Radial extension (meter) of one range bin.'
+        Name: height_resolution
+                dimensions: ('measurement_interval',)
+                size: 1
+                type: dtype('float32')
+                long_name: 'height resolution'
+                units: 'm'
+                comment: 'Height resolution (meter)'
+        Name: frequency_excursion
+                dimensions: ('measurement_interval',)
+                size: 1
+                type: dtype('float32')
+                long_name: 'frequency excursion'
+                units: 's-1'
+                comment: 'Frequency excursion of the transmitted linear frequency sweep.'
+        Name: sweep_time
+                dimensions: ('measurement_interval',)
+                size: 1
+                type: dtype('float32')
+                long_name: 'sweep time'
+                units: 'ms'
+                comment: 'Sweep time (milliseconds) of the transmitted linear frequency sweep.'
+        Name: tx_attenuation
+                dimensions: ('time',)
+                size: 28670
+                type: dtype('int16')
+                long_name: 'attenuation of the transmitted power'
+                units: 'dB'
+                comment: 'Attenuation of the transmitted power (decibel) in order to prevent saturation of the radar receivers in precipitation.'
+        Name: NDop
+                dimensions: ('measurement_interval',)
+                size: 1
+                type: dtype('int16')
+                long_name: 'number of Doppler samples'
+                comment: 'Number of sweeps that are averaged for the calculation of one profile.'
+        Name: elevation_main_beam
+                dimensions: ('measurement_interval',)
+                size: 1
+                type: dtype('float32')
+                long_name: 'elevation angle of the main beam above horizon'
+                units: 'degree'
+                comment: 'Elevation (degree) measured from the horizon (0 deg) upwards.'
+        Name: longitude
+                dimensions: ('scalar',)
+                size: 1
+                type: dtype('float32')
+                long_name: 'radar longitude'
+                units: 'degrees_east'
+                comment: 'Longitude (degrees east) of the radar location.'
+        Name: latitude
+                dimensions: ('scalar',)
+                size: 1
+                type: dtype('float32')
+                long_name: 'radar_latitude'
+                units: 'degrees_north'
+                comment: 'Latitude (degrees north) of the radar location.'
+        Name: altitude
+                dimensions: ('scalar',)
+                size: 1
+                type: dtype('float32')
+                long_name: 'radar altitude (amsl.)'
+                units: 'm'
+                comment: 'Altitude (meter) of the radar antennas above mean sea level.'

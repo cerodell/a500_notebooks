@@ -19,6 +19,8 @@ import cr500
 import pandas as pd
 import pdb
 
+class NoDataException(Exception):
+    pass
 
 def download(
     filename,

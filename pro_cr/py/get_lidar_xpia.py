@@ -24,14 +24,12 @@ from matplotlib import pyplot as plt
 #import matplotlib.patches as mpatches
 
 import math 
-
-#from  bl_pro.utils.data_read import download
 #the_file='lidar/WC16_XPIA/WLS866-16_2015_06_07__00_00_00.rtd'
 
+the_file='lidar/WLS7-68_2015_02_09__21_18_31.sta'
 
-the_file='lidar/WLS7-61_2015_06_07__00_00_00.sta'
-
-#out=download(the_file, dest_folder= context.pro_data_dir)
+#the_file = Path.glob('*.sta')
+#out=download.download(the_file, dest_folder= str(context.pro_data_dir) + '/lidar/')
     
 #####################################################################
 '''######################  Read Files ############################'''
