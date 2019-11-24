@@ -53,13 +53,24 @@ def get_attrs(ncvar):
 #all_files=context.pro_data_dir.glob('cesar*.nc')
 
 
-def read(all_files):
+def read(files):
+    """
+    Reads cabuaw surface flux, surface met, tower and doppler data into a directory 
+    
+    """
+    ## Initialize dictionary
     var_dict={}
+    
+    ## Sort Files...really important for the processed_multi-beam files
+    all_files = sorted(files, key = lambda file: os.path.getctime(file))
 
+    ## Loop files
+    doppler_list = []
     for the_file in all_files:
         if str(the_file).find('nubiscope') > -1:
             continue
         print(the_file)
+        ## Read Files
         with Dataset(the_file,'r') as f:
             details=f.variables['iso_dataset']
             attr_dict=get_attrs(details)
@@ -67,8 +78,10 @@ def read(all_files):
             lat=attr_dict['northbound_latitude']
             title=attr_dict['title'].split()
             filetype='{}_{}'.format(*title[1:3])
-    
+#            print(details)
             print(filetype)
+            
+
             if filetype == 'meteorological_surface':
                 print('Surf Met')
                 for var in ['P0','RAIN']:
@@ -84,22 +97,32 @@ def read(all_files):
                 print('Surf Flux')
                 for var in ['UST','H']:
                     var_dict[var] = f.variables[var][...]
-    
+            
             elif filetype == 'processed_multi-beam':
-                print('Radar')
-                for var in ['vertical_velocity','horizontal_wind_speed','horizontal_wind_direction']:
-                    var_i = f.variables[var][...]
-                    scale_factor = f.variables[var].scale_factor
-    #                print(scale_factor)
-                    var_dict[var] = var_i*scale_factor               
-                for var in ['range_resolution','height_1st_interval','time']:
-                    var_dict[var] = f.variables[var][...]   
-    
+                doppler_file = context.pro_data_dir.glob(the_file.name)
+                for file in doppler_file:
+                    with Dataset(file,'r') as f:
+                        dop_dict = {}
+                        for var in ['vertical_velocity','horizontal_wind_speed','horizontal_wind_direction']:
+                            var_i=f.variables[var][...]
+                            scale_factor=f.variables[var].scale_factor
+                            dop_dict[var]=(var_i*scale_factor) 
+                            
+                        for var in ['range_resolution','height_1st_interval','time']:
+                            dop_dict[var] = f.variables[var][...]  
+                doppler_list.append(dop_dict)
+
+            
             else:
                 raise ValueError("didn't recognize {}".format(filetype))
                 
-    #        ncdump.ncdump(nc_in)
-    return(var_dict)
+
+    d = {}
+    for k in doppler_list[0].keys():
+        d[k] = np.concatenate(list(d[k] for d in doppler_list))
+    final_dict = {**var_dict, **d}
+
+    return(var_dict,doppler_list, dop_dict,final_dict )
 
        
 
