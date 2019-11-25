@@ -87,17 +87,47 @@ def read(files):
                 print('Surf Met')
                 for var in ['P0','RAIN']:
                     var_dict[var] = f.variables[var][...]
+                    
+                the_time=f.variables['time'][...]
+                start_date=f.variables['product'].date_start_of_data
+                start_date = parse(start_date)
+                time_vec=[]
+                for the_hour in the_time:
+                    time_vec.append(start_date + datetime.timedelta(hours=float(the_hour)))
+                time_vec=np.array(time_vec)
+                var_dict['Datetime_Met'] = time_vec
+                time_vec=[]
     
             elif filetype == 'tower_meteorological':
     #            ncdump.ncdump(f)
                 print('Tower')
                 for var in ['TA','F','D','z']:
                     var_dict[var] = f.variables[var][...]
+                    
+                the_time=f.variables['time'][...]
+                start_date=f.variables['product'].date_start_of_data
+                start_date = parse(start_date)
+                time_vec=[]
+                for the_hour in the_time:
+                    time_vec.append(start_date + datetime.timedelta(hours=float(the_hour)))
+                time_vec=np.array(time_vec)
+                var_dict['Datetime_Tower'] = time_vec
+                time_vec=[]
     
             elif filetype == 'surface_fluxes':
                 print('Surf Flux')
                 for var in ['UST','H']:
                     var_dict[var] = f.variables[var][...]
+                    
+                the_time=f.variables['time'][...]
+                start_date=f.variables['product'].date_start_of_data
+                start_date = parse(start_date)
+                time_vec=[]
+                for the_hour in the_time:
+                    time_vec.append(start_date + datetime.timedelta(hours=float(the_hour)))
+                time_vec=np.array(time_vec)
+                var_dict['Datetime_Flux'] = time_vec
+                time_vec=[]
                                 
             elif filetype == 'processed_multi-beam':
                 dop_dict = {}
@@ -106,8 +136,24 @@ def read(files):
                     scale_factor=f.variables[var].scale_factor
                     dop_dict[var]=(var_i*scale_factor) 
                         
-                for var in ['range_resolution','height_1st_interval','time']:
-                    dop_dict[var] = f.variables[var][...] 
+                for var in ['range_resolution','height_1st_interval','time','product']:
+                    dop_dict[var] = f.variables[var][...]
+       
+                the_time=f.variables['time'][...]
+                start_date=f.variables['product'].date_start_of_data
+                start_date = parse(start_date)
+                time_vec=[]
+                for the_hour in the_time:
+                    time_vec.append(start_date + datetime.timedelta(hours=float(the_hour)))
+                time_vec=np.array(time_vec)
+                dop_dict['Datetime_Doppler'] = time_vec
+                time_vec=[]
+
+
+#                dop_dict['start_time'] = f.variables['product'].date_start_of_data
+#                dop_dict['stop_time'] = f.variables['product'].date_end_of_data
+
+
                 doppler_list.append(dop_dict)
         
             else:
@@ -120,6 +166,7 @@ def read(files):
     final_dict = {**var_dict, **d}
 
     return(var_dict,doppler_list, dop_dict,final_dict )
+#    return(final_dict)  
 
        
 

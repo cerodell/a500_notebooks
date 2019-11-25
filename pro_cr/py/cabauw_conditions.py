@@ -21,9 +21,8 @@ files=context.pro_data_dir.glob('cesar*.nc')
 
 
 
-final_dict, doppler_list, dop_dict, final_dict = read_cabauw.read(files)
+var_dict,doppler_list, dop_dict,final_dict= read_cabauw.read(files)
 
 
 
-
-
+print(final_dict['Datetime_Doppler'][-1])
