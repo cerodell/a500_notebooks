@@ -87,7 +87,7 @@ def read(files):
                 print('Surf Met')
                 for var in ['P0','RAIN']:
                     var_dict[var] = f.variables[var][...]
-                    var_dict[var] = f.variables[var].dimensions
+                    var_dict['dims'] = f.variables[var].dimensions
 
                     
                 the_time=f.variables['time'][...]
@@ -105,6 +105,7 @@ def read(files):
                 print('Tower')
                 for var in ['TA','F','D','z']:
                     var_dict[var] = f.variables[var][...]
+
                     
                 the_time=f.variables['time'][...]
                 start_date=f.variables['product'].date_start_of_data
