@@ -63,7 +63,8 @@ def read(files):
     
     ## Sort Files...really important for the processed_multi-beam files
     all_files = sorted(files, key = lambda file: os.path.getctime(file))
-
+    all_files = all_files[::-1]
+    
     ## Loop files
     doppler_list = []
     for the_file in all_files:
@@ -97,22 +98,18 @@ def read(files):
                 print('Surf Flux')
                 for var in ['UST','H']:
                     var_dict[var] = f.variables[var][...]
-            
+                                
             elif filetype == 'processed_multi-beam':
-                doppler_file = context.pro_data_dir.glob(the_file.name)
-                for file in doppler_file:
-                    with Dataset(file,'r') as f:
-                        dop_dict = {}
-                        for var in ['vertical_velocity','horizontal_wind_speed','horizontal_wind_direction']:
-                            var_i=f.variables[var][...]
-                            scale_factor=f.variables[var].scale_factor
-                            dop_dict[var]=(var_i*scale_factor) 
-                            
-                        for var in ['range_resolution','height_1st_interval','time']:
-                            dop_dict[var] = f.variables[var][...]  
+                dop_dict = {}
+                for var in ['vertical_velocity','horizontal_wind_speed','horizontal_wind_direction']:
+                    var_i=f.variables[var][...]
+                    scale_factor=f.variables[var].scale_factor
+                    dop_dict[var]=(var_i*scale_factor) 
+                        
+                for var in ['range_resolution','height_1st_interval','time']:
+                    dop_dict[var] = f.variables[var][...] 
                 doppler_list.append(dop_dict)
-
-            
+        
             else:
                 raise ValueError("didn't recognize {}".format(filetype))
                 
