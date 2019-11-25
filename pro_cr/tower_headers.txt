@@ -1,0 +1,197 @@
+NetCDF Global Attributes:
+        institution: 'Royal Netherlands Meteorological Institute (KNMI)'
+        comment: 'none'
+        Conventions: 'CF-1.4'
+        location: 'CESAR observatory, the Netherlands'
+        file_creation_date_time: '20180802 14:57:20 (UTC)'
+        references: 'cesar_tower_meteo_lc1_t10_v1.0.pdf @ http://www.cesar-database.nl'
+        history: 'Continuous observations are performed, gap filled and archived. The data product is published in monthly intervals.'
+NetCDF dimension information:
+        Name: time
+                size: 4464
+                type: dtype('float32')
+                units: 'hours since 2018-07-01 00:00:00 0:00'
+                long_name: 'hours since 2018-07-01 00:00:00 (UTC)'
+                standard_name: 'time'
+                axis: 'T'
+                bounds: 'time_bnds'
+        Name: nv
+                size: 2
+                WARNING: nv does not contain variable attributes
+        Name: day_in_time_interval
+                size: 31
+                WARNING: day_in_time_interval does not contain variable attributes
+        Name: z
+                size: 7
+                type: dtype('float32')
+                units: 'm'
+                long_name: 'Height above surface'
+                standard_name: 'height'
+                _FillValue: -9999.0
+                positive: 'up'
+                axis: 'Z'
+NetCDF variable information for group root:
+        Name: iso_dataset
+                dimensions: ()
+                size: 1.0
+                type: dtype('S1')
+                hierarchyLevel: 'dataset'
+                url: 'http://www.cesar-database.nl'
+                protocol: 'website'
+                topic: 'climatologyMeteorologyAtmosphere'
+                westbound_longitude: '4.926'
+                eastbound_longitude: '4.926'
+                southbound_latitude: '51.97'
+                northbound_latitude: '51.97'
+                datasetDateType: 'publication'
+                code: '28992'
+                codeSpace: 'EPSG'
+                accessConstraints: 'CESAR data policy'
+                useLimitation: 'None'
+                organisationName_dataset: 'Royal Netherlands Meteorological Institute (KNMI)'
+                email_dataset: 'fred.bosveld@knmi.nl'
+                role_dataset: 'Principle Investigator'
+                organisationName_metadata: 'Royal Netherlands Meteorological Institute (KNMI)'
+                role_metadata: 'Principle Investigator'
+                email_metadata: 'fred.bosveld@knmi.nl'
+                url_metadata: 'http://www.knmi.nl/~bosveld'
+                metadataDateType: 'creation'
+                language: 'eng'
+                metadataStandardName: 'ISO-19115'
+                metadataStandardNameVersion: 'Nederlands profiel op ISO 19115 voor geografie, v1.2'
+                title: 'CESAR tower meteorological profiles validated and gap filled'
+                abstract: 'Meteorological profile observations of wind speed, wind direction, temperature and dew point from the 200 m Cabauw tower at 10 minute time base, validated and gapfilled.'
+                status: 'onGoing'
+                uid_dataset: '2deadd36-4737-4c2e-8010-c72007643862'
+                keyword: 'Profile temperature humidity wind'
+                temporal_extent: '2001-01-01,onGoing'
+                statement: 'Continuous observations are performed, gap filled and archived. The data product is published in monthly intervals.'
+                metadata_id: '437886ae-c904-4361-a6a2-849d040c0f14'
+                datasetDate: '2012-06-05'
+                metadataDate: '2012-06-05'
+        Name: product
+                dimensions: ()
+                size: 1.0
+                type: dtype('S1')
+                format_version: 'netCDF,3.6'
+                originator: 'Bosveld, F.C., KNMI'
+                software_version: 'see http://www.knmi.nl/~bosveld -> software -> Mobibase'
+                command_line: ' ncselect.x cabcon a10 [M]cesar,[O]cesar_tower_meteo_lc1_t10_v1.0 201807 -f/nobackup/users/bosveld/temp/cesar_tower_meteo_lc1_t10_v1.0_201807.nc.tmp'
+                date_start_of_data: '2018-07-01T00:00Z'
+                date_end_of_data: '2018-07-31T23:59Z'
+                revision_date: '2018-08-02'
+                ref_doc: 'cesar_tower_meteo_lc1_t10_v1.0.pdf'
+                ref_doc_version: 'v1.0'
+        Name: station_details
+                dimensions: ()
+                size: 1.0
+                type: dtype('S1')
+                name: 'CESAR observatory'
+                latitude: '51.97'
+                longitude: '4.926'
+                elevation: '-0.7'
+                WMO_id: '06348'
+                address: 'Zijdeweg 1'
+                postal_code: '3411 MH'
+                city: 'Lopik'
+                administration_area: 'Utrecht'
+                country: 'the Netherlands'
+        Name: date
+                dimensions: ('time',)
+                size: 4464
+                type: dtype('int32')
+                long_name: 'yyyymmdd'
+        Name: valid_dates
+                dimensions: ('day_in_time_interval',)
+                size: 31
+                type: dtype('int8')
+                comment: 'indicates whether any data are included for a particular day: 0=none, 1=data, index runs from date indicated by "units" attribute of the time variable'
+        Name: time_bnds
+                dimensions: ('time', 'nv')
+                size: 8928
+                type: dtype('float32')
+        Name: F
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: 'm s-1'
+                long_name: 'MERGED Wind speed'
+                standard_name: 'wind_speed'
+                ancillary_variables: 'IF'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: IF
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED Wind speed Source index'
+                _FillValue: -9999.0
+        Name: D
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: 'degree'
+                long_name: 'MERGED Wind direction'
+                standard_name: 'wind_from_direction'
+                ancillary_variables: 'ID'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: ID
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED Wind direction Source index'
+                _FillValue: -9999.0
+        Name: TA
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: 'K'
+                long_name: 'MERGED Air temperature'
+                standard_name: 'air_temperature'
+                ancillary_variables: 'ITA'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: ITA
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED Air temperature Source index'
+                _FillValue: -9999.0
+        Name: TD
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: 'K'
+                long_name: 'Dew point temperature from MERGED Spec. hum.'
+                standard_name: 'dew_point_temperature'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: Q
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: '1e-3'
+                long_name: 'MERGED Specific humidity'
+                ancillary_variables: 'IQ'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
+        Name: IQ
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: '-'
+                long_name: 'MERGED Specific humidity     Source index'
+                _FillValue: -9999.0
+        Name: RH
+                dimensions: ('time', 'z')
+                size: 31248
+                type: dtype('float32')
+                units: '1e-2'
+                long_name: 'Rel. hum. from MERGED air and dew-point temp.'
+                standard_name: 'relative_humidity'
+                _FillValue: -9999.0
+                cell_methods: 'time: mean'
