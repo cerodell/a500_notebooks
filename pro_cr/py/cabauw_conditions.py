@@ -26,16 +26,9 @@ var_dict,doppler_list, dop_dict,final_dict= read_cabauw.read(files)
 
 
 
-#print(var_dict['RAIN'])
+
+ds_insitu  = xr.Dataset(var_dict)
+ds_doppler = xr.Dataset(dop_dict)
 
 
 
-#ds = xarray.merge([xarray.open_dataset(f) for f in files])
-
-
-ds = xr.DataArray.from_dict(final_dict)
-
-
-
-
-#var_dict.keys()
