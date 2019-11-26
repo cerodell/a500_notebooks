@@ -31,4 +31,7 @@ ds_insitu  = xr.Dataset(var_dict)
 ds_doppler = xr.Dataset(dop_dict)
 
 
+test = ds_insitu.where(ds_insitu.time<100)
 
+
+ds_doppler

@@ -163,11 +163,6 @@ def read(files):
                 dop_dict.update({'Datetime_Doppler' : (dims,time_vec)})
                 time_vec=[]
 
-
-#                dop_dict['start_time'] = f.variables['product'].date_start_of_data
-#                dop_dict['stop_time'] = f.variables['product'].date_end_of_data
-
-
                 doppler_list.append(dop_dict)
         
             else:
