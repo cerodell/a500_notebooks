@@ -126,24 +126,52 @@ Whenever you want to update your fork with the latest upstream changes, you'll n
 <!-- #region -->
 ## When changes are made on the upstream master, you can incorporate those changes to your fork like this:
 
+Fetch project branches from the upstream repository to get all the commits. Your commits to master will be stored in the local branch upstream/master.
+
 ### Fetch new upstream changes
 
 
 ` git fetch upstream `
 
-###  Switch (checkout) your branch
-
-` git checkout -b <initials> `
+###  Checkout the master branch from your local fork.
 
 
-` git rebase upstream/master `
+` git checkout master `
+
+### Now merge the changes from upstream/master into your local master branch.
+
+Your fork’s master branch will be in sync with the upstream repository. You will not lose your local changes.
+
+NOTE: You will be prompted to type a commit
+
+`git merge upstream/master`
 
 ##################################################################
 
 <!-- #endregion -->
 
 <!-- #region -->
-## Workflow for your forked/branch repo:
+## Once you have incorporated changes to you local master you can merge your local branch
+
+
+### Make sure you are still in the master branch 
+
+` git checkout master `
+
+### Merge your local branch to the local master 
+
+NOTE: You will be prompted to type a commit
+
+`git merge <initials>`
+
+###### Also useful for updating your local master from your branch (see below for update to branch)
+
+
+##################################################################
+<!-- #endregion -->
+
+<!-- #region -->
+## Workflow for your local branch repo:
 
 ### To add new changes
 `git add .`
