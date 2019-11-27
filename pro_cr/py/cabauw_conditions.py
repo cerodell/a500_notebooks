@@ -11,6 +11,8 @@ Created on Sun Nov 24 11:42:52 2019
 
 
 from cr500.utils import read_cabauw
+from matplotlib import pyplot as plt
+import numpy as np
 from pathlib import Path
 import xarray as xr
 import context
@@ -23,32 +25,45 @@ data_dir= str(context.pro_data_dir)
 files = sorted(list(Path(data_dir).glob("*.nc")))
 #print(files)
 
-#glob('cesar*.nc')
+
+var_list, doppler_list, fill_var = read_cabauw.read(files)
 
 
 
-#print(files)
-
-#all_files = []
-#for data_file in sorted(os.listdir(files)):
-#    print(data_file)
-
-var_dict = read_cabauw.read(files)
-
-#for key in doppler_dict:
-#    print(key)
-#doppler_dict.keys
-
-ds_insitu  = xr.Dataset(var_dict)
-
-#ds_doppler = xr.Dataset(doppler_dict)
+ds_insitu = read_cabauw.xarray_insitu(var_list)
+ds_doppler = read_cabauw.xarray_doppler(doppler_list)
 
 
-#test = ds_insitu.where(ds_insitu.time<100)
+#for key in ds_doppler:
+#    zzz = ds_doppler.where(key == fill_var, key ,  np.nan)
+    
+test = doppler_list[0]
+
+#ds_hour_insitu  = ds_insitu.groupby('Datetime_Met.hour').mean('time')
+#ds_hour_doppler = ds_doppler.groupby('Datetime_Doppler.hour').mean('time')
 
 
-#ds_doppler
+#ds_doppler.horizontal_wind_speed
 
 
 
-#xr.combine_nested(xr,'time')
+#ds_insitu.UST
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
