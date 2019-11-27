@@ -158,11 +158,6 @@ NOTE: You will be prompted to type a commit
 
 ` git checkout master `
 
-### Add commit on new changes
-
-`git commit -m "Add note" `
-
-
 ### Merge your local branch to the local master 
 
 NOTE: You will be prompted to type a commit
