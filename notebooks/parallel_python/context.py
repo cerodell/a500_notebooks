@@ -1,3 +1,17 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: all,-language_info,-toc,-latex_envs
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.3.0
+# ---
+
+# %%
 """
 http://docs.python-guide.org/en/latest/writing/structure
 
@@ -12,6 +26,7 @@ import sys
 import site
 from pathlib import Path
 
+# %%
 this_dir = Path(__file__).resolve().parent
 data_dir = this_dir.parent / 'data'
 sys.path.insert(0, str(this_dir))

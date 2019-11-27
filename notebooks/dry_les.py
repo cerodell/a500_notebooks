@@ -1,9 +1,22 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: all,-language_info,-toc,-latex_envs
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.3.0
+# ---
+
 # %% [markdown]
 # <h1>Table of Contents<span class="tocSkip"></span></h1>
 # <div class="toc"><ul class="toc-item"><li><span><a href="#setup" data-toc-modified-id="setup-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>setup</a></span></li><li><span><a href="#Introduction" data-toc-modified-id="Introduction-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Introduction</a></span><ul class="toc-item"><li><span><a href="#The-Dry-LES-dataset" data-toc-modified-id="The-Dry-LES-dataset-2.1"><span class="toc-item-num">2.1&nbsp;&nbsp;</span>The Dry LES dataset</a></span><ul class="toc-item"><li><span><a href="#Intro-to-netcdf" data-toc-modified-id="Intro-to-netcdf-2.1.1"><span class="toc-item-num">2.1.1&nbsp;&nbsp;</span>Intro to netcdf</a></span></li></ul></li><li><span><a href="#Intro-to-python-packages" data-toc-modified-id="Intro-to-python-packages-2.2"><span class="toc-item-num">2.2&nbsp;&nbsp;</span>Intro to python packages</a></span></li><li><span><a href="#Setting-up-the-environment" data-toc-modified-id="Setting-up-the-environment-2.3"><span class="toc-item-num">2.3&nbsp;&nbsp;</span>Setting up the environment</a></span></li><li><span><a href="#Intro-to-jupytext" data-toc-modified-id="Intro-to-jupytext-2.4"><span class="toc-item-num">2.4&nbsp;&nbsp;</span>Intro to jupytext</a></span></li><li><span><a href="#Now-download-the-data" data-toc-modified-id="Now-download-the-data-2.5"><span class="toc-item-num">2.5&nbsp;&nbsp;</span>Now download the data</a></span></li><li><span><a href="#Dumping-the-netcdf-metadata" data-toc-modified-id="Dumping-the-netcdf-metadata-2.6"><span class="toc-item-num">2.6&nbsp;&nbsp;</span>Dumping the netcdf metadata</a></span></li><li><span><a href="#Plot-$\theta$-profile-for-every-third-timestep-(i.e.-every-30-minutes)" data-toc-modified-id="Plot-$\theta$-profile-for-every-third-timestep-(i.e.-every-30-minutes)-2.7"><span class="toc-item-num">2.7&nbsp;&nbsp;</span>Plot $\theta$ profile for every third timestep (i.e. every 30 minutes)</a></span></li><li><span><a href="#Color-contour-plot-of-one-level-for-realization-c1,-last-timestep" data-toc-modified-id="Color-contour-plot-of-one-level-for-realization-c1,-last-timestep-2.8"><span class="toc-item-num">2.8&nbsp;&nbsp;</span>Color contour plot of one level for realization c1, last timestep</a></span></li></ul></li><li><span><a href="#Assignment" data-toc-modified-id="Assignment-3"><span class="toc-item-num">3&nbsp;&nbsp;</span>Assignment</a></span><ul class="toc-item"><li><span><a href="#Option-1----return-perturbations-as-a-list" data-toc-modified-id="Option-1----return-perturbations-as-a-list-3.1"><span class="toc-item-num">3.1&nbsp;&nbsp;</span>Option 1 -- return perturbations as a list</a></span></li><li><span><a href="#Option-2----return-a-4-dimensional-array-with-ensembles-as-the-first-dimension" data-toc-modified-id="Option-2----return-a-4-dimensional-array-with-ensembles-as-the-first-dimension-3.2"><span class="toc-item-num">3.2&nbsp;&nbsp;</span>Option 2 -- return a 4 dimensional array with ensembles as the first dimension</a></span></li><li><span><a href="#Calculate-the-ensemble-perturbation-of-the-enthalpy-flux-in-$W/m^2$" data-toc-modified-id="Calculate-the-ensemble-perturbation-of-the-enthalpy-flux-in-$W/m^2$-3.3"><span class="toc-item-num">3.3&nbsp;&nbsp;</span>Calculate the ensemble perturbation of the enthalpy flux in $W/m^2$</a></span></li><li><span><a href="#Plot-the-ensemble-average-along-with-the-10-individual-horizontal-averages" data-toc-modified-id="Plot-the-ensemble-average-along-with-the-10-individual-horizontal-averages-3.4"><span class="toc-item-num">3.4&nbsp;&nbsp;</span>Plot the ensemble average along with the 10 individual horizontal averages</a></span></li></ul></li></ul></div>
 
 # %%
-#import antigravity
+# import antigravity
 
 # %% [markdown]
 # # setup
@@ -12,7 +25,8 @@
 
 # %%
 import context
-print(f'here is the data folder: {context.data_dir}')
+
+print(f"here is the data folder: {context.data_dir}")
 
 # %%
 import sys
@@ -47,28 +61,28 @@ import numpy as np
 # ```
 #
 # The `a500_notebooks` folder contains a python setup.py file:  https://github.com/phaustin/a500_notebooks/blob/master/setup.py
-# which can be used to install a series of helper routines:  
+# which can be used to install a series of helper routines:
 #
 # https://github.com/phaustin/a500_notebooks/tree/master/a500/utils
 #
 # a. To install these using pip, first sync with my repo.
-#    
+#
 #      cd a500_notebooks
 #      git fetch origin
 #      git reset --hard origin/master
-#  
+#
 #  b. Next to an ["editable install"](https://stackoverflow.com/questions/42609943/what-is-the-use-case-for-pip-install-e), so that you can continue to change the module after installation:
-#     
+#
 #     pip install -e .
-#     
+#
 #    (this is called an editable install for reasons I'll explain in class)
-#    
+#
 #    [1]: https://en.wikipedia.org/wiki/Pip_(package_manager)
-#  
+#
 # b. Check the install by executing the cell below to download a data file.
 #
 #    If it succeeds, you should see:
-#    
+#
 #        download case_60_10.nc: size is    499.3 Mbytes
 
 # %% [markdown]
@@ -99,10 +113,11 @@ import numpy as np
 # ## Now download the data
 
 # %%
-from  a500.utils.data_read import download
-the_root="http://clouds.eos.ubc.ca/~phil/docs/atsc500/data/"
-the_file='case_60_10.nc'
-out=download(the_file,root=the_root,dest_folder=a500.data_dir)
+from a500.utils.data_read import download
+
+the_root = "http://clouds.eos.ubc.ca/~phil/docs/atsc500/data/"
+the_file = "case_60_10.nc"
+out = download(the_file, root=the_root, dest_folder=a500.data_dir)
 
 # %% [markdown]
 # ## Dumping the netcdf metadata
@@ -123,40 +138,44 @@ with Dataset(the_file) as nc_in:
 # ## Plot $\theta$ profile for every third timestep (i.e. every 30 minutes)
 
 # %%
-def make_theta(temp,press):
+def make_theta(temp, press):
     """
       temp in K
       press in Pa
       returns theta in K
     """
-    p0=1.e5
-    Rd=287.  #J/kg/K
-    cpd=1004.  #J/kg/K
-    theta=temp*(p0/press)**(Rd/cpd)
+    p0 = 1.0e5
+    Rd = 287.0  # J/kg/K
+    cpd = 1004.0  # J/kg/K
+    theta = temp * (p0 / press) ** (Rd / cpd)
     return theta
 
-case_name= a500.data_dir / 'case_60_10.nc'
+
+case_name = a500.data_dir / "case_60_10.nc"
 #
 #  look at the first ensemble member
 #
-ensemble='c1'
-with Dataset(case_name,'r') as ncin:
+ensemble = "c1"
+with Dataset(case_name, "r") as ncin:
     #
     # grab the group variables
     #
     group = ncin.groups[ensemble]
-    temp=group.variables['TABS'][...]
-    press=ncin.variables['press'][...]
-    z=ncin.variables['z'][...]
-mean_temp=temp.mean(axis=(3,2))
+    temp = group.variables["TABS"][...]
+    press = ncin.variables["press"][...]
+    z = ncin.variables["z"][...]
+mean_temp = temp.mean(axis=(3, 2))
 
-fig,ax=plt.subplots(1,1,figsize=(10,8))
-for i in np.arange(0,temp.shape[0],3):
-    theta = make_theta(mean_temp[i,:],press)
-    ax.plot(theta,z)
-out=ax.set(xlabel=r'$\overline{\theta}$ (K)',ylabel='height (m)',
-       title=f'LES dry run for realization {ensemble}:  surface flux=60 $W\,m^{-2}$, $\Gamma$=10 K/km')
-ax.grid(True, which='both')
+fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+for i in np.arange(0, temp.shape[0], 3):
+    theta = make_theta(mean_temp[i, :], press)
+    ax.plot(theta, z)
+out = ax.set(
+    xlabel=r"$\overline{\theta}$ (K)",
+    ylabel="height (m)",
+    title=f"LES dry run for realization {ensemble}:  surface flux=60 $W\,m^{-2}$, $\Gamma$=10 K/km",
+)
+ax.grid(True, which="both")
 
 
 # %%
@@ -169,19 +188,19 @@ temp.shape
 # 2. Retrieve the horizontal temperature field for this realization at the last timestep
 
 # %%
-index=np.searchsorted(z,400.)
-temp_400=temp[-1,index,:,:]
+index = np.searchsorted(z, 400.0)
+temp_400 = temp[-1, index, :, :]
 
 
 # %%
-temp_diff=temp_400 - temp_400.mean(axis=(0,1))
-fig,ax=plt.subplots(1,1,figsize=(10,8))
-with Dataset(case_name,'r') as ncin:
-    x=ncin.variables['x'][...]
-    y=ncin.variables['y'][...]
-cs=ax.pcolormesh(x,y,temp_diff)
-cb=fig.colorbar(cs)
-cb.set_label('temperature perturbation (K)',rotation=-90)
+temp_diff = temp_400 - temp_400.mean(axis=(0, 1))
+fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+with Dataset(case_name, "r") as ncin:
+    x = ncin.variables["x"][...]
+    y = ncin.variables["y"][...]
+cs = ax.pcolormesh(x, y, temp_diff)
+cb = fig.colorbar(cs)
+cb.set_label("temperature perturbation (K)", rotation=-90)
 
 
 # %% [markdown]
@@ -243,20 +262,21 @@ def do_ensemble_average(nc_in, varname, timestep):
     # also fine to list the group names by hand
     #  like ['c0','c1','c2',...]
     #
-    group_names=list(nc_in.groups.keys())
-    group0=nc_in.groups[group_names[0]]
-    var0=group0.variables[varname][timestep,...]
+    group_names = list(nc_in.groups.keys())
+    group0 = nc_in.groups[group_names[0]]
+    var0 = group0.variables[varname][timestep, ...]
     for a_name in group_names[1:]:
-        the_group=nc_in.groups[a_name]
-        new_var = the_group.variables[varname][timestep,...]
+        the_group = nc_in.groups[a_name]
+        new_var = the_group.variables[varname][timestep, ...]
         var0 = var0 + new_var
     avg_var = var0 / len(group_names)
     return avg_var
 
-the_file= a500.data_dir / 'case_60_10.nc'
+
+the_file = a500.data_dir / "case_60_10.nc"
 
 with Dataset(the_file) as nc_in:
-    out=do_ensemble_average(nc_in,'TABS',-1)
+    out = do_ensemble_average(nc_in, "TABS", -1)
 
 
 # %% [markdown]
@@ -289,18 +309,19 @@ def find_perturbations_1(nc_in, varname, timestep):
       dimensioned [z,y,x]  where ensemble_no
       is the index indicating ensemble member
     """
-    the_avg=do_ensemble_average(nc_in, varname, timestep)
-    group_names=list(nc_in.groups.keys())
-    perturb_list=list()
+    the_avg = do_ensemble_average(nc_in, varname, timestep)
+    group_names = list(nc_in.groups.keys())
+    perturb_list = list()
     for a_name in group_names:
-        the_group=nc_in.groups[a_name]
-        new_var = the_group.variables[varname][timestep,...]
-        the_perturb=new_var - the_avg
+        the_group = nc_in.groups[a_name]
+        new_var = the_group.variables[varname][timestep, ...]
+        the_perturb = new_var - the_avg
         perturb_list.append(the_perturb)
     return perturb_list
 
+
 with Dataset(the_file) as nc_in:
-    out=find_perturbations_1(nc_in,'TABS',-1)
+    out = find_perturbations_1(nc_in, "TABS", -1)
 
 
 # %% [markdown]
@@ -332,34 +353,33 @@ def find_perturbations_2(nc_in, varname, timestep):
       is the index indicating ensemble member
     
     """
-    the_avg=do_ensemble_average(nc_in, varname, timestep)
+    the_avg = do_ensemble_average(nc_in, varname, timestep)
     #
     # get the first ensemble member to set the dimensions and
     # find the dtype
     #
-    group_names=list(nc_in.groups.keys())
+    group_names = list(nc_in.groups.keys())
     group_0 = nc_in.groups[group_names[0]]
-    var_0 = group_0.variables[varname][timestep,...]
-    dtype=var_0.dtype
-    zlen,ylen,xlen=var_0.shape
+    var_0 = group_0.variables[varname][timestep, ...]
+    dtype = var_0.dtype
+    zlen, ylen, xlen = var_0.shape
     #
     # create an empty 4 dimensional array with ensemble number as the
     # lead index
     #
-    perturb_array=np.empty([len(group_names),zlen,ylen,xlen],dtype=dtype)
+    perturb_array = np.empty([len(group_names), zlen, ylen, xlen], dtype=dtype)
     the_perturb = var_0 - the_avg
-    perturb_array[0,...]=the_perturb[...]
-    for index,a_name in enumerate(group_names[1:]):
-        the_group=nc_in.groups[a_name]
-        new_var = the_group.variables[varname][timestep,...]
-        the_perturb=new_var - the_avg
-        perturb_array[index+1,...]=the_perturb
+    perturb_array[0, ...] = the_perturb[...]
+    for index, a_name in enumerate(group_names[1:]):
+        the_group = nc_in.groups[a_name]
+        new_var = the_group.variables[varname][timestep, ...]
+        the_perturb = new_var - the_avg
+        perturb_array[index + 1, ...] = the_perturb
     return perturb_array
 
 
-
 # %%
-def do_ensemble_reynolds(var0,var1):
+def do_ensemble_reynolds(var0, var1):
     """
     given two 4 dimensional arrays with dimensions [ensemble_num,z,y,x]
     find the ensemble Reynolds average of their product
@@ -379,10 +399,11 @@ def do_ensemble_reynolds(var0,var1):
     reynolds_avg:  ndarray
       dimensions [z,y,x] -- the three dimensional Reynolds average
     """
-    reynolds_avg=(var0*var1).mean(axis=(0,))
+    reynolds_avg = (var0 * var1).mean(axis=(0,))
     return reynolds_avg
 
-def do_horiz_reynolds(var0,var1):
+
+def do_horiz_reynolds(var0, var1):
     """
     given two 3 dimensional arrays with dimensions [z,y,x]
     find the horizontal Reynolds average of their product
@@ -402,9 +423,8 @@ def do_horiz_reynolds(var0,var1):
     reynolds_avg:  ndarray
       dimensions [z] -- the Reynolds average of the perturbations
     """
-    reynolds_avg=(var0*var1).mean(axis=(1,2))
+    reynolds_avg = (var0 * var1).mean(axis=(1, 2))
     return reynolds_avg
-
 
 
 # %% [markdown]
@@ -412,35 +432,30 @@ def do_horiz_reynolds(var0,var1):
 
 # %%
 with Dataset(the_file) as nc_in:
-    Tperturb=find_perturbations_2(nc_in,'TABS',-1)
-    Wperturb=find_perturbations_2(nc_in,'W',-1)
-    height = nc_in.variables['z'][:]
-    
-reynolds_ens_avg=do_ensemble_reynolds(Wperturb,Tperturb)
-rho=1  #kg/m^3
-cp=1024 #J/kg/K
-reynolds_ens_watts = rho*cp*reynolds_ens_avg
+    Tperturb = find_perturbations_2(nc_in, "TABS", -1)
+    Wperturb = find_perturbations_2(nc_in, "W", -1)
+    height = nc_in.variables["z"][:]
 
+reynolds_ens_avg = do_ensemble_reynolds(Wperturb, Tperturb)
+rho = 1  # kg/m^3
+cp = 1024  # J/kg/K
+reynolds_ens_watts = rho * cp * reynolds_ens_avg
 
 
 # %% [markdown]
 # ## Plot the ensemble average along with the 10 individual horizontal averages
 
 # %%
-fig, ax = plt.subplots(1,1,figsize=(7,7))
-horiz_avg=reynolds_ens_watts.mean(axis=(1,2))
-avg_flux=ax.plot(horiz_avg,height,lw=3)
+fig, ax = plt.subplots(1, 1, figsize=(7, 7))
+horiz_avg = reynolds_ens_watts.mean(axis=(1, 2))
+avg_flux = ax.plot(horiz_avg, height, lw=3)
 ax.set(xlabel="enthalpy flux (W/m^2)")
 ax.set(ylabel="height (m)")
 ax.set(title="last time step, sensible enthalpy flux")
 
-nens,nz,ny,nx = Tperturb.shape
+nens, nz, ny, nx = Tperturb.shape
 for i in range(nens):
-    the_temp=Tperturb[i,...]
-    the_wvel=Wperturb[i,...]
-    horiz_avg_flux = do_horiz_reynolds(the_temp,the_wvel)*rho*cp
-    ax.plot(horiz_avg_flux,height,'b-',lw=0.4)
-    
-
-
-
+    the_temp = Tperturb[i, ...]
+    the_wvel = Wperturb[i, ...]
+    horiz_avg_flux = do_horiz_reynolds(the_temp, the_wvel) * rho * cp
+    ax.plot(horiz_avg_flux, height, "b-", lw=0.4)

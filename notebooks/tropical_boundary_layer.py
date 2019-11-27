@@ -2,28 +2,18 @@
 # jupyter:
 #   jupytext:
 #     cell_metadata_filter: all
-#     notebook_metadata_filter: all,-language_info
+#     cell_metadata_json: true
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: all,-language_info,-toc,-latex_envs
 #     text_representation:
 #       extension: .py
 #       format_name: percent
-#       format_version: '1.2'
-#       jupytext_version: 1.2.4
+#       format_version: '1.3'
+#       jupytext_version: 1.3.0
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python3
-#   toc:
-#     base_numbering: 1
-#     nav_menu: {}
-#     number_sections: true
-#     sideBar: true
-#     skip_h1_title: true
-#     title_cell: Table of Contents
-#     title_sidebar: Contents
-#     toc_cell: true
-#     toc_position: {}
-#     toc_section_display: block
-#     toc_window_display: false
 # ---
 
 # %% [markdown] {"toc": true}

@@ -4,7 +4,8 @@
 #   jupytext:
 #     cell_metadata_filter: all
 #     cell_metadata_json: true
-#     notebook_metadata_filter: all,-language_info
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: all,-language_info,-toc,-latex_envs
 #     text_representation:
 #       extension: .py
 #       format_name: percent
@@ -14,38 +15,8 @@
 #     display_name: Python 3
 #     language: python
 #     name: python3
-#   latex_envs:
-#     LaTeX_envs_menu_present: true
-#     autoclose: false
-#     autocomplete: true
-#     bibliofile: biblio.bib
-#     cite_by: apalike
-#     current_citInitial: 1
-#     eqLabelWithNumbers: true
-#     eqNumInitial: 1
-#     hotkeys:
-#       equation: meta-9
-#     labels_anchors: false
-#     latex_user_defs: false
-#     report_style_numbering: false
-#     user_envs_cfg: false
-#   toc:
-#     base_numbering: 1
-#     nav_menu: {}
-#     number_sections: true
-#     sideBar: true
-#     skip_h1_title: false
-#     title_cell: Table of Contents
-#     title_sidebar: Contents
-#     toc_cell: true
-#     toc_position: {}
-#     toc_section_display: true
-#     toc_window_display: true
 # ---
 
-# %% [markdown] {"toc": true}
-# <h1>Table of Contents<span class="tocSkip"></span></h1>
-# <div class="toc"><ul class="toc-item"><li><span><a href="#Xarray-for-multidimensional-gridded-data" data-toc-modified-id="Xarray-for-multidimensional-gridded-data-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Xarray for multidimensional gridded data</a></span><ul class="toc-item"><li><span><a href="#Xarray-data-structures" data-toc-modified-id="Xarray-data-structures-1.1"><span class="toc-item-num">1.1&nbsp;&nbsp;</span>Xarray data structures</a></span><ul class="toc-item"><li><span><a href="#DataArray" data-toc-modified-id="DataArray-1.1.1"><span class="toc-item-num">1.1.1&nbsp;&nbsp;</span>DataArray</a></span></li><li><span><a href="#Multidimensional-DataArray" data-toc-modified-id="Multidimensional-DataArray-1.1.2"><span class="toc-item-num">1.1.2&nbsp;&nbsp;</span>Multidimensional DataArray</a></span></li><li><span><a href="#Datasets" data-toc-modified-id="Datasets-1.1.3"><span class="toc-item-num">1.1.3&nbsp;&nbsp;</span>Datasets</a></span></li><li><span><a href="#Coordinates-vs.-Data-Variables" data-toc-modified-id="Coordinates-vs.-Data-Variables-1.1.4"><span class="toc-item-num">1.1.4&nbsp;&nbsp;</span>Coordinates vs. Data Variables</a></span></li></ul></li><li><span><a href="#Working-with-Labeled-Data" data-toc-modified-id="Working-with-Labeled-Data-1.2"><span class="toc-item-num">1.2&nbsp;&nbsp;</span>Working with Labeled Data</a></span><ul class="toc-item"><li><span><a href="#Selecting-Data-(Indexing)" data-toc-modified-id="Selecting-Data-(Indexing)-1.2.1"><span class="toc-item-num">1.2.1&nbsp;&nbsp;</span>Selecting Data (Indexing)</a></span></li><li><span><a href="#Computation" data-toc-modified-id="Computation-1.2.2"><span class="toc-item-num">1.2.2&nbsp;&nbsp;</span>Computation</a></span></li><li><span><a href="#Broadcasting" data-toc-modified-id="Broadcasting-1.2.3"><span class="toc-item-num">1.2.3&nbsp;&nbsp;</span>Broadcasting</a></span></li><li><span><a href="#Reductions" data-toc-modified-id="Reductions-1.2.4"><span class="toc-item-num">1.2.4&nbsp;&nbsp;</span>Reductions</a></span></li><li><span><a href="#Aside:-Swapping-Dims" data-toc-modified-id="Aside:-Swapping-Dims-1.2.5"><span class="toc-item-num">1.2.5&nbsp;&nbsp;</span>Aside: Swapping Dims</a></span></li></ul></li><li><span><a href="#Groupby:-Example-with-SST-Climatology" data-toc-modified-id="Groupby:-Example-with-SST-Climatology-1.3"><span class="toc-item-num">1.3&nbsp;&nbsp;</span>Groupby: Example with SST Climatology</a></span></li></ul></li></ul></div>
 
 # %% [markdown]
 # # Xarray for multidimensional gridded data
