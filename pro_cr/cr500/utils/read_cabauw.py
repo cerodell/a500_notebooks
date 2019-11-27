@@ -62,12 +62,17 @@ def read(files):
     var_dict={}
     
     ## Sort Files...really important for the processed_multi-beam files
-    all_files = sorted(files, key = lambda file: os.path.getctime(file))
-    all_files = all_files[::-1]
+#    all_files = sorted(files, key = lambda file: os.path.getctime(file))
+#    all_files = all_files[::-1]
     
+#    all_files = []
+#    for data_file in sorted(os.listdir(files)):
+#        print(data_file)
+#        
+
     ## Loop files
     doppler_list = []
-    for the_file in all_files:
+    for the_file in files:
         if str(the_file).find('nubiscope') > -1:
             continue
         print(the_file)
@@ -169,12 +174,13 @@ def read(files):
                 raise ValueError("didn't recognize {}".format(filetype))
                 
 
-    d = {}
-    for k in doppler_list[0].keys():
-        d[k] = np.concatenate(list(d[k] for d in doppler_list))
-    final_dict = {**var_dict, **d}
+#    d = {}
+#    for k in doppler_list[0].keys():
+#        d[k] = np.concatenate(list(d[k] for d in doppler_list))
+        
+#    final_dict = {**var_dict, **d}
 
-    return(var_dict,doppler_list, dop_dict,final_dict )
+    return(var_dict)
 #    return(final_dict)  
 
        
