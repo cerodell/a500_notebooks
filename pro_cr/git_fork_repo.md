@@ -164,6 +164,12 @@ NOTE: You will be prompted to type a commit
 
 `git merge <initials>`
 
+### Push you local master with you merged local branch 
+
+`git push`
+
+
+
 ###### Also useful for updating your local master from your branch (see below for update to branch)
 
 
