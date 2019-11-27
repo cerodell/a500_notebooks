@@ -151,10 +151,27 @@ NOTE: You will be prompted to type a commit
 <!-- #endregion -->
 
 <!-- #region -->
-## Once you have incorporated changes to you local master you can merge your local branch
+## Once you have incorporated changes to you local master you can update your local branch
+
+### Check out your branch 
+
+`git checkout <initials>`      
 
 
-### Make sure you are still in the master branch 
+### Update your local branch from local master 
+
+`git fetch origin`
+
+`git merge origin/master`
+
+
+##################################################################
+<!-- #endregion -->
+
+<!-- #region -->
+## Update your local master from changes made in your local branch
+
+### Checkout master branch 
 
 ` git checkout master `
 
