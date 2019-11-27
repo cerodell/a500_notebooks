@@ -153,6 +153,7 @@ NOTE: You will be prompted to type a commit
 <!-- #region -->
 ## Once you have incorporated changes to you local master you can merge your local branch
 
+
 ### Make sure you are still in the master branch 
 
 ` git checkout master `
@@ -163,12 +164,14 @@ NOTE: You will be prompted to type a commit
 
 `git merge <initials>`
 
+###### Also useful for updating your local master from your branch (see below for update to branch)
+
 
 ##################################################################
 <!-- #endregion -->
 
 <!-- #region -->
-## Workflow for your forked/branch repo:
+## Workflow for your local branch repo:
 
 ### To add new changes
 `git add .`
