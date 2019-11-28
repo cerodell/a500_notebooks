@@ -129,6 +129,7 @@ def read(files):
                 var_dict={}
                 print('Tower')
                 for var in ['TA','F','D','z']:
+                    fill_var = f.variables[var]._FillValue
                     var_array = f.variables[var][...]
                     dims = f.variables[var].dimensions
                     var_dict.update({var : (dims,np.array(var_array))})
@@ -157,7 +158,7 @@ def read(files):
                 dop_dict = {}
                 for var in ['vertical_velocity','horizontal_wind_speed','horizontal_wind_direction']:
                     var_i=f.variables[var][...]
-                    fill_var = f.variables[var]._FillValue
+#                    fill_var = f.variables[var]._FillValue
 #                    print(fill_var)
 #                    var_i[var_i == fill_var] = fill_var
 #                    var_ii = var_i
@@ -191,7 +192,7 @@ def read(files):
                 raise ValueError("didn't recognize {}".format(filetype))
                 
 
-    return(var_list, doppler_list, fill_var)
+    return(var_list, fill_var)
 
 
 def xarray_doppler(dict_list): 
