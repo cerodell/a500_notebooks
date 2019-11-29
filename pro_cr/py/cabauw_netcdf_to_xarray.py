@@ -43,11 +43,11 @@ out_dir = Path(str(context.pro_data_dir)+str('/xr/'))
 out_dir.mkdir(parents=True, exist_ok=True)
 
 
+#tower_list = tower_list[0]
 
-
-full_dir = str(out_dir) + str(f"/surf_ds.zarr")
-surf_ds.compute()
-surf_ds.to_zarr(full_dir, "w")
+full_dir = str(out_dir) + str(f"/var_ds.zarr")
+var_ds.compute()
+var_ds.to_zarr(full_dir, "w")
 print(f"wrote {out_dir}")
 
 

@@ -25,7 +25,9 @@ import xarray as xr
 
 
 
-
+def nanfill(var, fill_var):
+    var[var == fill_var] = np.nan
+    return(var)
 
 
 def get_attrs(ncvar):
@@ -96,7 +98,7 @@ def read(files):
     
 
     ## Loop files
-    var_list, doppler_list = [], []
+    var_list, met_list, tower_list, surf_list = [], [], [], []
     for the_file in files:
         if str(the_file).find('nubiscope') > -1:
             continue
@@ -115,15 +117,21 @@ def read(files):
                 var_dict={}
                 print('Surf Met')
                 for var in ['P0','RAIN']:
+                    fill_var = f.variables[var]._FillValue
                     var_array = f.variables[var][...]
+                    array = np.array(var_array, dtype=float)
+                    array[array == fill_var] = np.nan
+
                     dims = f.variables[var].dimensions
-                    var_dict.update({var : (dims,np.array(var_array))})
+                    var_dict.update({var : (dims,np.array(array))})
                 
                 time_vec, dims = maketime(f)
-                var_dict.update({'Datetime_Met' : (dims,time_vec)})
+                var_dict.update({'time' : (dims,time_vec)})
                 time_vec=[]
                 
+                met_list.append(var_dict)
                 var_list.append(var_dict)
+
 
             elif filetype == 'tower_meteorological':
                 var_dict={}
@@ -131,71 +139,47 @@ def read(files):
                 for var in ['TA','F','D','z']:
                     fill_var = f.variables[var]._FillValue
                     var_array = f.variables[var][...]
+                    array = np.array(var_array, dtype=float)
+                    array[array == fill_var] = np.nan
+
                     dims = f.variables[var].dimensions
-                    var_dict.update({var : (dims,np.array(var_array))})
+                    var_dict.update({var : (dims,np.array(array))})
                 
                 time_vec, dims = maketime(f)
-                var_dict.update({'Datetime_Tower' : (dims,time_vec)})
+                var_dict.update({'time' : (dims,time_vec)})
                 time_vec=[]
                 
+                tower_list.append(var_dict)
                 var_list.append(var_dict)
+
                 
             elif filetype == 'surface_fluxes':
                 var_dict={}
                 print('Surf Flux')
                 for var in ['UST','H']:
+                    fill_var = f.variables[var]._FillValue
                     var_array = f.variables[var][...]
+                    array = np.array(var_array, dtype=float)
+                    array[array == fill_var] = np.nan
+
                     dims = f.variables[var].dimensions
-                    var_dict.update({var : (dims,np.array(var_array))})
+                    var_dict.update({var : (dims,np.array(array))})
                 
                 time_vec, dims = maketime(f)
-                var_dict.update({'Datetime_Flux' : (dims,time_vec)})
+                var_dict.update({'time' : (dims,time_vec)})
                 time_vec=[]
                 
+                surf_list.append(var_dict)
                 var_list.append(var_dict)
-                
-            elif filetype == 'processed_multi-beam':
-                dop_dict = {}
-                for var in ['vertical_velocity','horizontal_wind_speed','horizontal_wind_direction']:
-                    var_i=f.variables[var][...]
-#                    fill_var = f.variables[var]._FillValue
-#                    print(fill_var)
-#                    var_i[var_i == fill_var] = fill_var
-#                    var_ii = var_i
-#                    print("After nan fill")
-#                    print(var_i)
-                    scale_factor=f.variables[var].scale_factor
-#                    print(scale_factor)
-                    var_array=(var_i*scale_factor) 
-#                    var_array = np.where(var_ii == fill_var, var_ii, np.empty)
-                    var_array[var_array == fill_var] = np.NAN
 
-#                    print(np.max(var_array))
-#                    print(np.min(var_array))
-
-                    dims = f.variables[var].dimensions
-                    dop_dict.update({var : (dims,np.array(var_array))})
-                        
-                for var in ['range_resolution','height_1st_interval']:
-                    var_array = f.variables[var][...]
-                    dims = f.variables[var].dimensions
-                    dop_dict.update({var : (dims,np.array(var_array))})   
-                                
-                time_vec, dims = maketime(f)
-    
-                dop_dict.update({'Datetime_Doppler' : (dims,time_vec)})
-                time_vec=[]
-
-                doppler_list.append(dop_dict)
-        
             else:
                 raise ValueError("didn't recognize {}".format(filetype))
                 
 
-    return(var_list, fill_var)
+    return(var_list, met_list, tower_list, surf_list, fill_var)
 
 
-def xarray_doppler(dict_list): 
+def xarray_unlike(dict_list): 
     xarray_files = []
     for index in dict_list:
         ds  = xr.Dataset(index)
@@ -204,7 +188,7 @@ def xarray_doppler(dict_list):
     return(ds_final)
 
     
-def xarray_insitu(dict_list):
+def xarray_like(dict_list):
     xarray_files = []
     for index in dict_list:
         ds  = xr.Dataset(index)
@@ -214,3 +198,42 @@ def xarray_insitu(dict_list):
 
 
 
+
+#### delan triangelisaztion  !!!!
+    
+##    scip.interpolate.lineaNDinteripliato   gausinas progress regression (interplote error with )
+
+#                
+#            elif filetype == 'processed_multi-beam':
+#                dop_dict = {}
+#                for var in ['vertical_velocity','horizontal_wind_speed','horizontal_wind_direction']:
+#                    var_i=f.variables[var][...]
+##                    fill_var = f.variables[var]._FillValue
+##                    print(fill_var)
+##                    var_i[var_i == fill_var] = fill_var
+##                    var_ii = var_i
+##                    print("After nan fill")
+##                    print(var_i)
+#                    scale_factor=f.variables[var].scale_factor
+##                    print(scale_factor)
+#                    var_array=(var_i*scale_factor) 
+##                    var_array = np.where(var_ii == fill_var, var_ii, np.empty)
+#                    var_array[var_array == fill_var] = np.NAN
+#
+##                    print(np.max(var_array))
+##                    print(np.min(var_array))
+#
+#                    dims = f.variables[var].dimensions
+#                    dop_dict.update({var : (dims,np.array(var_array))})
+#                        
+#                for var in ['range_resolution','height_1st_interval']:
+#                    var_array = f.variables[var][...]
+#                    dims = f.variables[var].dimensions
+#                    dop_dict.update({var : (dims,np.array(var_array))})   
+#                                
+#                time_vec, dims = maketime(f)
+#    
+#                dop_dict.update({'Datetime_Doppler' : (dims,time_vec)})
+#                time_vec=[]
+#
+#                doppler_list.append(dop_dict)
