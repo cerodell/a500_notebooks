@@ -199,41 +199,58 @@ def xarray_like(dict_list):
 
 
 
+
+
+def read_doppler(files): 
+    doppler_list = []
+    for the_file in files:
+        if str(the_file).find('nubiscope') > -1:
+            continue
+        print(the_file)
+        
+        with Dataset(the_file,'r') as f:
+                details=f.variables['iso_dataset']
+                attr_dict=get_attrs(details)
+                title=attr_dict['title'].split()
+                filetype='{}_{}'.format(*title[1:3])
+        #            print(details)
+                print(filetype)
+                
+                if filetype == 'processed_multi-beam':
+                    dop_dict = {}
+                    for var in ['vertical_velocity','horizontal_wind_speed','horizontal_wind_direction']:
+                        var_i=f.variables[var][...]
+                        fill_var = f.variables[var]._FillValue
+                        scale_factor=f.variables[var].scale_factor
+                        var_array=(var_i*scale_factor) 
+                        array = np.array(var_array, dtype=float)
+                        array[array == fill_var] = np.nan
+
+    
+#                        dims = f.variables[var].dimensions
+                        dims = ('time','z')
+                        dop_dict.update({var : (dims,np.array(array))})
+                            
+                    for var in ['height_1st_interval']:
+                        var_array = f.variables[var][...]
+                        array = np.array(var_array, dtype=float)
+
+                        dims = ('z')
+                        dop_dict.update({var : (dims,np.array(array))})   
+                        
+                    time_vec, dims = maketime(f)        
+                    dop_dict.update({'time' : (dims,time_vec)})
+                    time_vec=[]
+    
+                    doppler_list.append(dop_dict)
+
+    
+                else:
+                    raise ValueError("didn't recognize {}".format(filetype))  
+    return(doppler_list)
+                    
+                    
+    
 #### delan triangelisaztion  !!!!
     
 ##    scip.interpolate.lineaNDinteripliato   gausinas progress regression (interplote error with )
-
-#                
-#            elif filetype == 'processed_multi-beam':
-#                dop_dict = {}
-#                for var in ['vertical_velocity','horizontal_wind_speed','horizontal_wind_direction']:
-#                    var_i=f.variables[var][...]
-##                    fill_var = f.variables[var]._FillValue
-##                    print(fill_var)
-##                    var_i[var_i == fill_var] = fill_var
-##                    var_ii = var_i
-##                    print("After nan fill")
-##                    print(var_i)
-#                    scale_factor=f.variables[var].scale_factor
-##                    print(scale_factor)
-#                    var_array=(var_i*scale_factor) 
-##                    var_array = np.where(var_ii == fill_var, var_ii, np.empty)
-#                    var_array[var_array == fill_var] = np.NAN
-#
-##                    print(np.max(var_array))
-##                    print(np.min(var_array))
-#
-#                    dims = f.variables[var].dimensions
-#                    dop_dict.update({var : (dims,np.array(var_array))})
-#                        
-#                for var in ['range_resolution','height_1st_interval']:
-#                    var_array = f.variables[var][...]
-#                    dims = f.variables[var].dimensions
-#                    dop_dict.update({var : (dims,np.array(var_array))})   
-#                                
-#                time_vec, dims = maketime(f)
-#    
-#                dop_dict.update({'Datetime_Doppler' : (dims,time_vec)})
-#                time_vec=[]
-#
-#                doppler_list.append(dop_dict)
