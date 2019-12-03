@@ -14,7 +14,7 @@ Created on Thu Nov 28 14:03:45 2019
 """
 
 from matplotlib import pyplot as plt
-from cr500.utils import plt_set, constants
+from cr500.utils import plt_set, constants, wind_eq
 import numpy as np
 import xarray as xr
 import context
@@ -38,6 +38,7 @@ save = str(context.pro_data_dir)+str('/Images/')
 #
 # # Solve for Kinematic Sensible heat flux... add to var_ds
 
+# #### Should add the derivation with Latex
 # %%
 
 F_sfc = ((var_ds.H) / (((var_ds.P0 * 100) / (constants.R * var_ds.TA[:,-1])) * constants.Cp))
@@ -187,33 +188,96 @@ avg_seasons = var_ds.groupby('time.season').groups
 #
 # # Apply conditional statements to var_ds to find a time of stable unstable and natural surface layer. 
 
+
 # %%
 
 
 temp_200m = np.array(var_ds.TA[:,0])
 temp_2m = np.array(var_ds.TA[:,-1])
 
-#inversion = var_ds.where(var_ds.P0 > 999, -1)
+temp_140_200m = (var_ds.TA[:,0] + var_ds.TA[:,1])/2
+temp_2_10m = (var_ds.TA[:,-1] + var_ds.TA[:,-2])/2
+
+m2_blas = np.array(temp_2_10m)
+m200_blas = np.array(temp_140_200m)
+
+### np.where hate NaN values so use this to ignor some runtime error
+np.warnings.filterwarnings('ignore')
+stable = var_ds.where(temp_140_200m > temp_2_10m, drop=False)
 
 
-inversion = var_ds.where(var_ds.TA[:,0] > var_ds.TA[:,-1], drop=False)
-
-
-temp_200m_inv = np.array(inversion.TA[:,0])
-temp_2m_inv = np.array(inversion.TA[:,-1])
-
-
-
-
-
-
-
-
+temp_200m_stb = np.array(stable.TA[:,0])
+temp_2m_stb = np.array(stable.TA[:,-1])
 
 
 
+L = wind_eq.obukhov_len(stable.UST,stable.TA[:,-1],stable.F_sfc)
+height = np.arange(2,202,2)
 
 
+m_z = [] 
+
+for i in range(len(z_list)):
+    m_z_i = wind_eq.loglin_stable(stable.UST,z_list[i],L)
+    m_z.append(m_z_i)
+
+m_z = np.stack(m_z)
+
+
+stable.update({'m_z_login':(('time','z'), m_z.T)})
+
+
+
+
+
+fig, ax = plt.subplots(1,1, figsize=(12,10))
+fig.suptitle('Log Linear Wind Profile in Stable Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
+
+ax.scatter(stable.F[110,:],z_list, color = 'red', marker='+')
+ax.plot(stable.m_z_login[110,:],z_list, color = 'k')
+
+
+#ax.plot(stable.F.mean(dim='time'),z_list, color = 'red')
+#ax.plot(stable.m_z_login.mean(dim='time'),z_list, color = 'k')
+
+#ax.set_xlabel("Wind Speed $(ms^-1)$", fontsize= plt_set.label)
+#ax.set_ylabel("Height Above Ground Level  \n (AGL)", fontsize= plt_set.label)
+ax.tick_params(axis='both', which='major', labelsize= plt_set.tick_size)
+ax.xaxis.grid(color='gray', linestyle='dashed')
+ax.yaxis.grid(color='gray', linestyle='dashed')
+ax.set_facecolor('lightgrey')
+#    ax.legend(loc='best')
+ax.legend(loc='upper right', bbox_to_anchor=(.80,1.0), shadow=True, ncol=6, title='Height AGL (meters)')
+   
+
+
+
+# %% [markdown]
+#
+# # Apply conditional statements to var_ds to find a time of stable unstable and natural surface layer. 
+
+
+# %% 
+
+unstable = var_ds.where(temp_2_10m  > temp_140_200m, drop=False)
+
+temp_200m_unstb = np.array(unstable.TA[:,0])
+temp_2m_unstb = np.array(unstable.TA[:,-1])
+
+#wind_eq.RxL()
+
+
+# %% [markdown]
+#
+# # Apply conditional statements to var_ds to find  natural surface layer. 
+
+
+# %% 
+
+nutral = var_ds.where(temp_2_10m  == temp_140_200m, drop=False)
+
+temp_200m_ntl = np.array(nutral.TA[:,0])
+temp_2m_ntl = np.array(nutral.TA[:,-1])
 
 
 
