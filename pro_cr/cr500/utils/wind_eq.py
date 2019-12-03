@@ -44,3 +44,22 @@ def do_reynolds(var):
     perturb= np.array(var) - avg
     return avg,perturb
 
+
+def logwind_neutral(u_str,z):
+    m_z = (u_str / constants.k) * np.log(z / constants.z_o)
+    return (m_z)
+
+
+def loglin_stable(u_str,z,L):
+    m_z = (u_str / constants.k) * (np.log(z / constants.z_o) + (6 * (z / L)))
+    return(m_z)
+
+
+
+def obukhov_len(u_str,temp,wtheta_peturb):
+    L = (- u_str ** 3) / (constants.k * (constants.g / temp) * wtheta_peturb)
+    return(L)
+
+
+
+

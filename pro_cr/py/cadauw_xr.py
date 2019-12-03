@@ -7,13 +7,17 @@ Created on Thu Nov 28 14:03:45 2019
 """
 
 from matplotlib import pyplot as plt
-from cr500.utils import plt_set
+from cr500.utils import plt_set, constants
 import numpy as np
 import xarray as xr
 import context
 
 
+# %% [markdown]
 
+## Read out .zarr files for Doppler and Insitu measurements
+
+# %% [markdown]
 
 filein = str(context.pro_data_dir)+str('/xr/var_ds.zarr')
 var_ds = xr.open_zarr(filein)
@@ -23,7 +27,23 @@ doppler_ds = xr.open_zarr(filein)
 
 save = str(context.pro_data_dir)+str('/Images/')
 
+# %% [markdown]
 
+## Solve for Kinematic Sensible heat flux... add to var_ds
+
+# %%
+
+F_sfc = ((var_ds.H) / (((var_ds.P0 * 100) / (constants.R * var_ds.TA[:,-1])) * constants.Cp))
+var_ds.update({'F_sfc':F_sfc})
+
+
+# %% [markdown]
+
+## Time avereage wind speed profile
+
+######### Plot the time avereage wind speed profile fromt he cabauw tower. Data for 2001 to 2019
+
+# %%
 
 ###############################################################################################
 """########################## Time avereage wind speed profile ############################"""
@@ -56,8 +76,13 @@ for i in range(len(z_list)-1):
 fig.savefig(save + 'Avg_Wind_Speed_Profile')
 
     
+# %% [markdown]
 
+## Wind speed profile at Hieght
 
+######### Plot  wind speed profile at height for the cabauw tower. Data for 2001 to 2019
+
+# %%
 ###############################################################################################
 """########################## Wind speed profile at Hieght ############################"""
 ###############################################################################################
@@ -87,6 +112,14 @@ for i in range(len(datestr)):
 fig.savefig(save + 'Time_Averaged_Wind_Speed_Profile_at_Height')
 
     
+
+
+# %% [markdown]
+
+## Time avereage wind speed profile by season
+
+
+# %%
 
 ###############################################################################################
 """##################### Time avereage wind speed profile by season #########################"""
@@ -119,15 +152,63 @@ avg_seasons = var_ds.groupby('time.season').groups
 
 
 
+# %% [markdown]
+
+## Merge Doppler and and Surface/Tower Data
 
 
 
-
+# %%
 ###############################################################################################
-"""##################### Time avereage wind speed profile by season #########################"""
+"""##################### Merge Doppler and and Surface/Tower Data  #########################"""
 ###############################################################################################
+#
+#var_2018 = var_ds.sel(time = slice('2018-05-01', '2018-09-01'))
+#avg_hour_2018 = var_2018.groupby('time.hour').mean(dim='time')
+#
+#doppler_hour = doppler_ds.groupby('time.hour').mean(dim='time')
+#
+#xarray_list = [avg_hour_2018, doppler_hour]
+#master_ds = xr.merge(xarray_list)
+#master_ds = xr.combine_nested(xarray_list, 'z')
 
-doppler_hour = doppler_ds.groupby('time.hour').mean(dim='time')
+#z_list = np.array(doppler_hour.height_1st_interval)
+#z_list = z_list[0,:]
 
-z_list = np.array(doppler_hour.height_1st_interval)
-z_list = z_list[0,:]
+
+# %% [markdown]
+
+## Apply conditional statements to var_ds to find a time of stable unstable and natural surface layer. 
+
+# %%
+
+var_ds
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
