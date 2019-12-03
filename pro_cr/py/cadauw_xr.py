@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# %% [markdown]
+
+# This notebook......
+
+
+# %%
+
 # -*- coding: utf-8 -*-
 """
 Created on Thu Nov 28 14:03:45 2019
@@ -17,7 +24,7 @@ import context
 
 ## Read out .zarr files for Doppler and Insitu measurements
 
-# %% [markdown]
+# %% 
 
 filein = str(context.pro_data_dir)+str('/xr/var_ds.zarr')
 var_ds = xr.open_zarr(filein)
