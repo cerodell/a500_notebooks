@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # %% [markdown]
-
-# This notebook......
+#
+# # This notebook......
 
 
 # %%
@@ -21,10 +21,10 @@ import context
 
 
 # %% [markdown]
+#
+# # Read out .zarr files for Doppler and Insitu measurements
 
-## Read out .zarr files for Doppler and Insitu measurements
-
-# %% 
+# %%
 
 filein = str(context.pro_data_dir)+str('/xr/var_ds.zarr')
 var_ds = xr.open_zarr(filein)
@@ -35,8 +35,8 @@ doppler_ds = xr.open_zarr(filein)
 save = str(context.pro_data_dir)+str('/Images/')
 
 # %% [markdown]
-
-## Solve for Kinematic Sensible heat flux... add to var_ds
+#
+# # Solve for Kinematic Sensible heat flux... add to var_ds
 
 # %%
 
@@ -45,10 +45,10 @@ var_ds.update({'F_sfc':F_sfc})
 
 
 # %% [markdown]
-
-## Time avereage wind speed profile
-
-######### Plot the time avereage wind speed profile fromt he cabauw tower. Data for 2001 to 2019
+#
+# # Time avereage wind speed profile
+#
+# ######## Plot the time avereage wind speed profile fromt he cabauw tower. Data for 2001 to 2019
 
 # %%
 
@@ -82,12 +82,12 @@ for i in range(len(z_list)-1):
    
 fig.savefig(save + 'Avg_Wind_Speed_Profile')
 
-    
+
 # %% [markdown]
-
-## Wind speed profile at Hieght
-
-######### Plot  wind speed profile at height for the cabauw tower. Data for 2001 to 2019
+#
+# # Wind speed profile at Hieght
+#
+# ######## Plot  wind speed profile at height for the cabauw tower. Data for 2001 to 2019
 
 # %%
 ###############################################################################################
@@ -122,8 +122,8 @@ fig.savefig(save + 'Time_Averaged_Wind_Speed_Profile_at_Height')
 
 
 # %% [markdown]
-
-## Time avereage wind speed profile by season
+#
+# # Time avereage wind speed profile by season
 
 
 # %%
@@ -160,10 +160,10 @@ avg_seasons = var_ds.groupby('time.season').groups
 
 
 # %% [markdown]
-
-## Merge Doppler and and Surface/Tower Data
-
-
+#
+# # Merge Doppler and and Surface/Tower Data
+#
+#
 
 # %%
 ###############################################################################################
@@ -184,15 +184,23 @@ avg_seasons = var_ds.groupby('time.season').groups
 
 
 # %% [markdown]
-
-## Apply conditional statements to var_ds to find a time of stable unstable and natural surface layer. 
+#
+# # Apply conditional statements to var_ds to find a time of stable unstable and natural surface layer. 
 
 # %%
 
-var_ds
+
+temp_200m = np.array(var_ds.TA[:,0])
+temp_2m = np.array(var_ds.TA[:,-1])
+
+#inversion = var_ds.where(var_ds.P0 > 999, -1)
 
 
+inversion = var_ds.where(var_ds.TA[:,0] > var_ds.TA[:,-1], drop=False)
 
+
+temp_200m_inv = np.array(inversion.TA[:,0])
+temp_2m_inv = np.array(inversion.TA[:,-1])
 
 
 
