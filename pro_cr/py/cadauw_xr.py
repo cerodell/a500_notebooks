@@ -13,10 +13,11 @@ Created on Thu Nov 28 14:03:45 2019
 @author: rodell
 """
 
-from matplotlib import pyplot as plt
 from cr500.utils import plt_set, constants, wind_eq
-import numpy as np
+from matplotlib import pyplot as plt
+import seaborn as sns
 import xarray as xr
+import numpy as np
 import context
 
 
@@ -36,14 +37,35 @@ save = str(context.pro_data_dir)+str('/Images/')
 
 # %% [markdown]
 #
-# # Solve for Kinematic Sensible heat flux... add to var_ds
+# # Solve for Virtual Temperature, Air Density, Kinematic Sensible heat flux, and the Obukhov length ... add all to var_ds
 
 # #### Should add the derivation with Latex
 # %%
+##  Air Density
+rho = var_ds.P0*1.e2/(constants.Rd*(var_ds.TA002 + 273.15))
 
-F_sfc = ((var_ds.H) / (((var_ds.P0 * 100) / (constants.R * var_ds.TA[:,-1])) * constants.Cp))
-var_ds.update({'F_sfc':F_sfc})
+## Fleagle and bussinger eq. 6.31
+Eb = var_ds.H + 0.02*var_ds.LE
 
+## Virtural temperature 
+Tv = var_ds.TA002 + 273.15  + 0.61*var_ds.Q002*1.e-3
+
+## add all to var_ds
+var_ds.update({'rho':rho})
+var_ds.update({'Eb':Eb})
+var_ds.update({'Tv':Tv})
+
+## the Obukhov length
+L = - var_ds.Tv*constants.Cp*rho*var_ds.UST**3./(constants.k*constants.g*var_ds.Eb)
+#good = np.abs(Eb) > 1
+
+
+## add to var_ds
+var_ds.update({'L':L})
+
+### MY OLD METHOD MAY DELETE!!!!!!!
+#F_sfc = ((var_ds.H) / (((var_ds.P0 * 100) / (constants.R * var_ds.TA[:,-1])) * constants.Cp))
+#var_ds.update({'F_sfc':F_sfc})
 
 # %% [markdown]
 #
@@ -82,6 +104,53 @@ for i in range(len(z_list)-1):
     ax.legend(loc='upper right', bbox_to_anchor=(.80,1.0), shadow=True, ncol=6, title='Height AGL (meters)')
    
 fig.savefig(save + 'Avg_Wind_Speed_Profile')
+
+
+# %%
+
+###############################################################################################
+"""########################## Time avereage wind speed profile ############################"""
+###############################################################################################
+### Group by hour
+avg_hour = var_ds.groupby('time.hour').mean(dim='time')
+
+datetime = np.array(avg_hour.hour)
+z_list = np.array(avg_hour.z)
+z_str = [str(i) for i in z_list]
+
+print(z_str[0][:-2])
+
+fig, ax = plt.subplots(1,1, figsize=(12,10))
+fig.suptitle('Hourly Time Averaged Temperaure Profile \n 2001 - 2019 ', fontsize= plt_set.title_size, fontweight="bold")
+# Get array of Time Averaged Wind Speed
+wsp = np.array(avg_hour.F)
+
+#for i in range(len(z_list)-1):
+#    ax.plot(datetime, avg_hour.TA[:,i] , label = z_str[i][:-2])
+#    ax.set_xlabel("Hour UTC \n (Local - 1)", fontsize= plt_set.label)
+#    ax.set_ylabel("Temperature $(K)$", fontsize= plt_set.label)
+#    ax.tick_params(axis='both', which='major', labelsize= plt_set.tick_size)
+#    ax.xaxis.grid(color='gray', linestyle='dashed')
+#    ax.yaxis.grid(color='gray', linestyle='dashed')
+#    ax.set_facecolor('lightgrey')
+##    ax.legend(loc='best')
+#    ax.legend(loc='upper right', bbox_to_anchor=(.55,1.0), shadow=True, ncol=6, title='Height AGL (meters)')
+#  
+#dat_height = np.meshgrid(datetime,z_list)
+#ax.contourf(dat_height[0], avg_hour.TA, z_list)
+#ax.set_xlabel("Hour UTC \n (Local - 1)", fontsize= plt_set.label)
+#ax.set_ylabel("Temperature $(K)$", fontsize= plt_set.label)
+#ax.tick_params(axis='both', which='major', labelsize= plt_set.tick_size)
+#ax.xaxis.grid(color='gray', linestyle='dashed')
+#ax.yaxis.grid(color='gray', linestyle='dashed')
+#ax.set_facecolor('lightgrey')
+##    ax.legend(loc='best')
+#ax.legend(loc='upper right', bbox_to_anchor=(.55,1.0), shadow=True, ncol=6, title='Height AGL (meters)')
+#
+#fig.savefig(save + 'Avg_Hourly_Temp_Profile')
+
+#avg_hour.TA.plot(x = 'time', y = 'z')
+
 
 
 # %% [markdown]
@@ -186,85 +255,151 @@ avg_seasons = var_ds.groupby('time.season').groups
 
 # %% [markdown]
 #
-# # Apply conditional statements to var_ds to find a time of stable unstable and natural surface layer. 
+# # Apply conditional statements to var_ds to find a time of stable, unstable and nutral surface layer. 
 
 
 # %%
 
+###############################################################################################
+"""##################### Merge Doppler and and Surface/Tower Data  #########################"""
+###############################################################################################
+#temp_140_200m = (var_ds.TA[:,0] + var_ds.TA[:,1])/2
+#temp_2_10m = (var_ds.TA[:,-1] + var_ds.TA[:,-2])/2
+grad = np.gradient(var_ds.TA, var_ds.z, axis = 1)
+grad_mean = np.mean(grad, axis =1)
 
-temp_200m = np.array(var_ds.TA[:,0])
-temp_2m = np.array(var_ds.TA[:,-1])
-
-temp_140_200m = (var_ds.TA[:,0] + var_ds.TA[:,1])/2
-temp_2_10m = (var_ds.TA[:,-1] + var_ds.TA[:,-2])/2
-
-m2_blas = np.array(temp_2_10m)
-m200_blas = np.array(temp_140_200m)
+var_ds.update({'dTdz_mean':(('time'), grad_mean)})
+var_ds.update({'dTdz':(('time','z'), grad)})
 
 ### np.where hate NaN values so use this to ignor some runtime error
 np.warnings.filterwarnings('ignore')
-stable = var_ds.where(temp_140_200m > temp_2_10m, drop=False)
+
+stable = var_ds.where((var_ds.dTdz_mean < 0), drop=False)
+
+unstable = var_ds.where(var_ds.dTdz_mean < 0.01 , drop=False)
+
+nutral = var_ds.where((var_ds.dTdz_mean > 0) & (var_ds.dTdz_mean < 0.01), drop=False)
 
 
-temp_200m_stb = np.array(stable.TA[:,0])
-temp_2m_stb = np.array(stable.TA[:,-1])
+uts = np.array(stable.UST)
+
+wsp = np.array(stable.F)
+
+l_ob = np.array(stable.L)
+
+# %% [markdown]
+
+# # Solve for wind speed at height in stable conditions using Log Linear Wind Equation
+
+# ##### ADD EQ!
+
+# %% 
+
+### Solve of the Obukhov length
+### Old method may delete !!!!!!!!!!
+#L = wind_eq.obukhov_len(stable.UST,stable.TA[:,-1],stable.F_sfc)
+
+#l_ob = np.array(L)
 
 
 
-L = wind_eq.obukhov_len(stable.UST,stable.TA[:,-1],stable.F_sfc)
-height = np.arange(2,202,2)
-
-
+## Make play data for height of loglin model
+#height = np.arange(10,201,1)
 m_z = [] 
 
-for i in range(len(z_list)):
-    m_z_i = wind_eq.loglin_stable(stable.UST,z_list[i],L)
-    m_z.append(m_z_i)
 
+## I hate this loop its slow and stupid
+for i in range(len(z_list)):
+    m_z_i = wind_eq.loglin_stable(stable.UST,z_list[i],stable.L)
+    m_z.append(m_z_i)
 m_z = np.stack(m_z)
 
-
+## Add to Stable DataArray
 stable.update({'m_z_login':(('time','z'), m_z.T)})
 
+wsp_mz = np.array(stable.m_z_login)
+
+
+# %% 
+
+### Solve of the Obukhov length
+### Old method may delete !!!!!!!!!!
+#L = wind_eq.obukhov_len(stable.UST,stable.TA[:,-1],stable.F_sfc)
+
+#l_ob = np.array(L)
 
 
 
+## Make play data for height of loglin model
+#height = np.arange(10,201,1)
+m_z = [] 
+
+
+## I hate this loop its slow and stupid
+for i in range(len(z_list)):
+    m_z_i = wind_eq.logwind_neutral(nutral.UST,z_list[i])
+    m_z.append(m_z_i)
+m_z = np.stack(m_z)
+
+## Add to Stable DataArray
+nutral.update({'mz_neutral':(('time','z'), m_z.T)})
+
+#wsp_mz = np.array(stable.m_z_login)
+
+# %% [markdown]
+#
+# # Plot of stable surface layer. 
+
+#stable.TA.plot(x = 'time')
+
+
+# %%
 
 fig, ax = plt.subplots(1,1, figsize=(12,10))
-fig.suptitle('Log Linear Wind Profile in Stable Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
+fig.suptitle('Log Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
 
-ax.scatter(stable.F[110,:],z_list, color = 'red', marker='+')
-ax.plot(stable.m_z_login[110,:],z_list, color = 'k')
+#ax.scatter(stable.F[206,:],z_list, color = 'red', marker='+')
+#ax.plot(stable.m_z_login[206,:],z_list, color = 'k')
+#ax.plot(stable.time,stable.TA[:,4], color = 'k')
 
 
-#ax.plot(stable.F.mean(dim='time'),z_list, color = 'red')
-#ax.plot(stable.m_z_login.mean(dim='time'),z_list, color = 'k')
+ax.scatter(nutral.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'tower')
+ax.plot(nutral.mz_neutral.mean(dim='time'),z_list, color = 'k', label = ')
 
-#ax.set_xlabel("Wind Speed $(ms^-1)$", fontsize= plt_set.label)
-#ax.set_ylabel("Height Above Ground Level  \n (AGL)", fontsize= plt_set.label)
+ax.set_xlabel("Wind Speed $(ms^-1)$", fontsize= plt_set.label)
+ax.set_ylabel("Height Above Ground Level  \n (AGL)", fontsize= plt_set.label)
 ax.tick_params(axis='both', which='major', labelsize= plt_set.tick_size)
 ax.xaxis.grid(color='gray', linestyle='dashed')
 ax.yaxis.grid(color='gray', linestyle='dashed')
 ax.set_facecolor('lightgrey')
 #    ax.legend(loc='best')
-ax.legend(loc='upper right', bbox_to_anchor=(.80,1.0), shadow=True, ncol=6, title='Height AGL (meters)')
+#ax.legend(loc='upper right', bbox_to_anchor=(.80,1.0), shadow=True, ncol=6, title='Height AGL (meters)')
    
-
+#
 
 
 # %% [markdown]
 #
-# # Apply conditional statements to var_ds to find a time of stable unstable and natural surface layer. 
+# # Apply conditional statements to var_ds to find a time of stable unstable surface layer. 
 
 
 # %% 
 
-unstable = var_ds.where(temp_2_10m  > temp_140_200m, drop=False)
+#print(np.array(stable.F[206,-2]))
+#print(np.array(stable.UST[206]))
 
-temp_200m_unstb = np.array(unstable.TA[:,0])
-temp_2m_unstb = np.array(unstable.TA[:,-1])
+#print(np.array(stable.z[-2]))
+
+#ust = np.array(stable.UST)
+#f_scf = np.array(stable.F_sfc)
+#unstable = var_ds.where(temp_2_10m  > temp_140_200m, drop=False)
+
+#temp_200m_unstb = np.array(unstable.TA[:,0])
+#temp_2m_unstb = np.array(unstable.TA[:,-1])
 
 #wind_eq.RxL()
+
+#stable2 = stable.where((stable.m_z_login[:,10] < 0) & (stable.m_z_login[:,10] > 40), drop=False)
 
 
 # %% [markdown]
@@ -274,14 +409,19 @@ temp_2m_unstb = np.array(unstable.TA[:,-1])
 
 # %% 
 
-nutral = var_ds.where(temp_2_10m  == temp_140_200m, drop=False)
+#nutral = var_ds.where(temp_2_10m  == temp_140_200m, drop=False)
 
-temp_200m_ntl = np.array(nutral.TA[:,0])
-temp_2m_ntl = np.array(nutral.TA[:,-1])
+#temp_200m_ntl = np.array(nutral.TA[:,0])
+#temp_2m_ntl = np.array(nutral.TA[:,-1])
+
+#print(np.nanmax(m_z))
+
+#stable2 = stable.where((stable.m_z_login > 0) & (stable.m_z_login < 100) , drop=False)
 
 
+# %% 
 
-
+#sns.jointplot(x= stable2.F[:,-2], y= stable2.m_z_login[:,-2], kind='kde')
 
 
 

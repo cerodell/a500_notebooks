@@ -16,10 +16,6 @@
 #     name: python3
 # ---
 
-# %% [markdown] {"toc": true}
-# <h1>Table of Contents<span class="tocSkip"></span></h1>
-# <div class="toc"><ul class="toc-item"><li><span><a href="#Introduction" data-toc-modified-id="Introduction-1"><span class="toc-item-num">1&nbsp;&nbsp;</span>Introduction</a></span><ul class="toc-item"><li><ul class="toc-item"><li><span><a href="#accumulate-the-vertical-flux-profile-for-each-of-the-10-ensemble-members--into-the-avg_flux-variable" data-toc-modified-id="accumulate-the-vertical-flux-profile-for-each-of-the-10-ensemble-members--into-the-avg_flux-variable-1.0.1"><span class="toc-item-num">1.0.1&nbsp;&nbsp;</span>accumulate the vertical flux profile for each of the 10 ensemble members  into the avg_flux variable</a></span></li><li><span><a href="#use-searchsorted-and-argmin-to-get-the-first-zero-crossing-for-each-of-the-48-profiles" data-toc-modified-id="use-searchsorted-and-argmin-to-get-the-first-zero-crossing-for-each-of-the-48-profiles-1.0.2"><span class="toc-item-num">1.0.2&nbsp;&nbsp;</span>use searchsorted and argmin to get the first zero crossing for each of the 48 profiles</a></span></li><li><span><a href="#look-at-variablity-among-ensemble-members-at-timestep-20" data-toc-modified-id="look-at-variablity-among-ensemble-members-at-timestep-20-1.0.3"><span class="toc-item-num">1.0.3&nbsp;&nbsp;</span>look at variablity among ensemble members at timestep 20</a></span></li><li><span><a href="#Does-the-inversion-height-grow-as-sqrt(time)?" data-toc-modified-id="Does-the-inversion-height-grow-as-sqrt(time)?-1.0.4"><span class="toc-item-num">1.0.4&nbsp;&nbsp;</span>Does the inversion height grow as sqrt(time)?</a></span></li></ul></li></ul></li><li><span><a href="#Save-the-results-to-a-json-file" data-toc-modified-id="Save-the-results-to-a-json-file-2"><span class="toc-item-num">2&nbsp;&nbsp;</span>Save the results to a json file</a></span></li></ul></div>
-
 # %% [markdown]
 # # Introduction
 #

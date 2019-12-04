@@ -22,27 +22,27 @@ import time
 
 
 
-data_dir_insitu = str(context.pro_data_dir)+str('/Doppler/')
-files = sorted(list(Path(data_dir_insitu).glob("*.nc")))
-#print(files)
-
-
-doppler_list  = read_cabauw.read_doppler(files)
-
-doppler_list_0 = doppler_list[0]
-doppler_ds = read_cabauw.xarray_unlike(doppler_list)
-
-
-
-out_dir = str(context.pro_data_dir)
-out_dir = Path(str(context.pro_data_dir)+str('/xr/'))
-out_dir.mkdir(parents=True, exist_ok=True)
-
-
-full_dir = str(out_dir) + str(f"/doppler_ds.zarr")
-doppler_ds.compute()
-doppler_ds.to_zarr(full_dir, "w")
-print(f"wrote {out_dir}")
+#data_dir_insitu = str(context.pro_data_dir)+str('/Doppler/')
+#files = sorted(list(Path(data_dir_insitu).glob("*.nc")))
+##print(files)
+#
+#
+#doppler_list  = read_cabauw.read_doppler(files)
+#
+#doppler_list_0 = doppler_list[0]
+#doppler_ds = read_cabauw.xarray_unlike(doppler_list)
+#
+#
+#
+#out_dir = str(context.pro_data_dir)
+#out_dir = Path(str(context.pro_data_dir)+str('/xr/'))
+#out_dir.mkdir(parents=True, exist_ok=True)
+#
+#
+#full_dir = str(out_dir) + str(f"/doppler_ds.zarr")
+#doppler_ds.compute()
+#doppler_ds.to_zarr(full_dir, "w")
+#print(f"wrote {out_dir}")
 
 
 #data_dir_insitu = str(context.pro_data_dir)+str('/Insitu/')

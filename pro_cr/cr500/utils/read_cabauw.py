@@ -116,7 +116,7 @@ def read(files):
             if filetype == 'meteorological_surface':
                 var_dict={}
                 print('Surf Met')
-                for var in ['P0','RAIN']:
+                for var in ['P0','RAIN', 'TA002', 'Q002']:
                     fill_var = f.variables[var]._FillValue
                     var_array = f.variables[var][...]
                     array = np.array(var_array, dtype=float)
@@ -156,7 +156,7 @@ def read(files):
             elif filetype == 'surface_fluxes':
                 var_dict={}
                 print('Surf Flux')
-                for var in ['UST','H']:
+                for var in ['UST','H', 'LE']:
                     fill_var = f.variables[var]._FillValue
                     var_array = f.variables[var][...]
                     array = np.array(var_array, dtype=float)
