@@ -278,11 +278,11 @@ meso_ds = var_ds.where((var_ds.RAIN < 0.0001), drop=False)
 np.warnings.filterwarnings('ignore')
 
 ## Apply conditional statements
-stable = var_ds.where((meso_ds.dTdz_mean < 0), drop=False)
+stable_i = var_ds.where((meso_ds.dTdz_mean < 0), drop=False)
 
-unstable = var_ds.where(meso_ds.dTdz_mean < 0.01 , drop=False)
+unstable = var_ds.where(meso_ds.dTdz_mean > 0.01 , drop=False)
 
-nutral = var_ds.where((meso_ds.dTdz_mean > 0) & (meso_ds.dTdz_mean < 0.01), drop=False)
+nutral = var_ds.where((meso_ds.dTdz_mean > 0) & (meso_ds.dTdz_mean < 0.006), drop=False)
 
 
 #uts = np.array(stable.UST)
@@ -306,22 +306,23 @@ nutral = var_ds.where((meso_ds.dTdz_mean > 0) & (meso_ds.dTdz_mean < 0.01), drop
 m_z = [] 
 ## I hate this loop its slow and stupid
 for i in range(len(z_list)):
-    m_z_i = wind_eq.loglin_stable(stable.UST,z_list[i],stable.L)
+    m_z_i = wind_eq.loglin_stable(stable_i.UST,z_list[i],stable_i.L)
     m_z.append(m_z_i)
 m_z = np.stack(m_z)
 
 ## Add to Stable DataArray
-stable.update({'mz_stable':(('time','z'), m_z.T)})
+stable_i.update({'mz_stable':(('time','z'), m_z.T)})
 
 ## Remove any odd negative values...some occur and I dont know why 
-stable = stable.where((stable.mz_stable > 0), drop=False)
+stable = stable_i.where((stable_i.mz_stable > 0) & (stable_i.mz_stable < 40), drop=False)
+#stable.where(stable.mz_stable > 0, drop=False)
 
 
 
 # %% 
 
 ###############################################################################################
-"""####################### Plot Stable Conditions mean and do Stats  ############################"""
+"""####################### Plot Stable Conditions mean and do Stats  #########################"""
 ###############################################################################################
 
 fig, ax = plt.subplots(1,1, figsize=(12,10))
@@ -340,6 +341,11 @@ ax.legend(loc='best')
    
 fig.savefig(save + 'Log_Linear_Wind_Profile_Stable_Surface_Layer')
 
+
+# %%
+#fig, ax = plt.subplots(1,1, figsize=(12,10))
+#fig.suptitle('Log Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
+sns.jointplot(x= stable.F, y= stable.mz_stable, kind='hex', bins=15)
 
 # %% [markdown]
 
@@ -366,10 +372,13 @@ m_z = np.stack(m_z)
 nutral.update({'mz_neutral':(('time','z'), m_z.T)})
 
 ## Remove any odd negative values...some occur and I dont know why 
-nutral = nutral.where((stable.mz_stable > 0), drop=False)
+nutral = nutral.where((nutral.mz_neutral > 0), drop=False)
 
 # %%
 
+###############################################################################################
+"""####################### Plot Neutral Conditions mean and do Stats  #########################"""
+###############################################################################################
 fig, ax = plt.subplots(1,1, figsize=(12,10))
 fig.suptitle('Log Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
 
@@ -387,28 +396,43 @@ ax.legend(loc='best')
    
 fig.savefig(save + 'Log_Wind_Profile_Nutrual_Surface_Layer')
 
+# %%
+#fig, ax = plt.subplots(1,1, figsize=(12,10))
+#fig.suptitle('Log Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
+sns.jointplot(x= nutral.F, y= nutral.mz_neutral, kind='hex', bins=15)
+
+
 # %% [markdown]
 #
 # # Apply conditional statements to var_ds to find a time of stable unstable surface layer. 
 
+# ##### ADD EQ!!!!!!!!!!!!!!
+
 
 # %% 
 
-#print(np.array(stable.F[206,-2]))
-#print(np.array(stable.UST[206]))
+###############################################################################################
+"""################## Unstable Conditions using Radix Wind Equation #######################"""
+###############################################################################################
 
-#print(np.array(stable.z[-2]))
 
-#ust = np.array(stable.UST)
-#f_scf = np.array(stable.F_sfc)
-#unstable = var_ds.where(temp_2_10m  > temp_140_200m, drop=False)
+"""#######  THIS SECTION NEEDS WORK 
+## Make play data for height of loglin model
+#height = np.arange(10,201,1)
+m_z = [] 
 
-#temp_200m_unstb = np.array(unstable.TA[:,0])
-#temp_2m_unstb = np.array(unstable.TA[:,-1])
+## I hate this loop its slow and stupid
+for i in range(len(z_list)):
+    m_z_i = wind_eq.RxL()
+    m_z.append(m_z_i)
+m_z = np.stack(m_z)
 
-#wind_eq.RxL()
+## Add to Stable DataArray
+unstable.update({'mz_unstable':(('time','z'), m_z.T)})
 
-#stable2 = stable.where((stable.m_z_login[:,10] < 0) & (stable.m_z_login[:,10] > 40), drop=False)
+## Remove any odd negative values...some occur and I dont know why 
+unstable = unstable.where((unstable.mz_unstable > 0), drop=False)
+
 
 
 # %% [markdown]
@@ -418,14 +442,6 @@ fig.savefig(save + 'Log_Wind_Profile_Nutrual_Surface_Layer')
 
 # %% 
 
-#nutral = var_ds.where(temp_2_10m  == temp_140_200m, drop=False)
-
-#temp_200m_ntl = np.array(nutral.TA[:,0])
-#temp_2m_ntl = np.array(nutral.TA[:,-1])
-
-#print(np.nanmax(m_z))
-
-#stable2 = stable.where((stable.m_z_login > 0) & (stable.m_z_login < 100) , drop=False)
 
 
 # %% 
@@ -433,7 +449,7 @@ fig.savefig(save + 'Log_Wind_Profile_Nutrual_Surface_Layer')
 #sns.jointplot(x= stable2.F[:,-2], y= stable2.m_z_login[:,-2], kind='kde')
 
 
-
+"""
 
 
 
