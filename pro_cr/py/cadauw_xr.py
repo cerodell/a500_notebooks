@@ -173,7 +173,7 @@ datestr = [str(i) for i in datetime]
 datestr = datestr[0::4]
 
 fig, ax = plt.subplots(1,1, figsize=(12,10))
-fig.suptitle('Hourly Time Averaged Wind Speed Profile at Height \n 2001 - 2019 ', fontsize= plt_set.title_size, fontweight="bold")
+fig.suptitle('Hourly Time Averaged Wind Speed Profile at Height \n 2001 - 2018 ', fontsize= plt_set.title_size, fontweight="bold")
 
 for i in range(len(datestr)):
     ax.plot(wsp.T[:,i],z_list, label = datestr[i])
@@ -210,7 +210,7 @@ avg_seasons = var_ds.groupby('time.season').groups
 #print(z_str[0][:-2])
 #
 #fig, ax = plt.subplots(2,2, figsize=(12,10))
-#fig.suptitle('Hourly Time Averaged Wind Speed Profile \n 2001 - 2019 ', fontsize= plt_set.title_size, fontweight="bold")
+#fig.suptitle('Hourly Time Averaged Wind Speed Profile \n 2001 - 2018 ', fontsize= plt_set.title_size, fontweight="bold")
 ##fig.autofmt_xdate()
 #
 ##for i in range(len(z_list)-1):
@@ -261,53 +261,49 @@ avg_seasons = var_ds.groupby('time.season').groups
 # %%
 
 ###############################################################################################
-"""##################### Merge Doppler and and Surface/Tower Data  #########################"""
+"""##################### Apply conditional statements to var_ds #########################"""
 ###############################################################################################
-#temp_140_200m = (var_ds.TA[:,0] + var_ds.TA[:,1])/2
-#temp_2_10m = (var_ds.TA[:,-1] + var_ds.TA[:,-2])/2
+## Solve for the dT/dz
 grad = np.gradient(var_ds.TA, var_ds.z, axis = 1)
 grad_mean = np.mean(grad, axis =1)
 
+##  Add to the DataArray
 var_ds.update({'dTdz_mean':(('time'), grad_mean)})
 var_ds.update({'dTdz':(('time','z'), grad)})
+
+## Drop any and all rain events
+meso_ds = var_ds.where((var_ds.RAIN < 0.0001), drop=False)
 
 ### np.where hate NaN values so use this to ignor some runtime error
 np.warnings.filterwarnings('ignore')
 
-stable = var_ds.where((var_ds.dTdz_mean < 0), drop=False)
+## Apply conditional statements
+stable = var_ds.where((meso_ds.dTdz_mean < 0), drop=False)
 
-unstable = var_ds.where(var_ds.dTdz_mean < 0.01 , drop=False)
+unstable = var_ds.where(meso_ds.dTdz_mean < 0.01 , drop=False)
 
-nutral = var_ds.where((var_ds.dTdz_mean > 0) & (var_ds.dTdz_mean < 0.01), drop=False)
+nutral = var_ds.where((meso_ds.dTdz_mean > 0) & (meso_ds.dTdz_mean < 0.01), drop=False)
 
 
-uts = np.array(stable.UST)
-
-wsp = np.array(stable.F)
-
-l_ob = np.array(stable.L)
+#uts = np.array(stable.UST)
+#wsp = np.array(stable.F)
+#l_ob = np.array(stable.L)
 
 # %% [markdown]
 
 # # Solve for wind speed at height in stable conditions using Log Linear Wind Equation
 
-# ##### ADD EQ!
+# ##### $$M(z) = ({u_*} / k) * [ln(z/z_o) + 6 * (z/L)]$$ 
 
 # %% 
 
-### Solve of the Obukhov length
-### Old method may delete !!!!!!!!!!
-#L = wind_eq.obukhov_len(stable.UST,stable.TA[:,-1],stable.F_sfc)
-
-#l_ob = np.array(L)
-
-
-
+###############################################################################################
+"""################## Stable Conditions using Log Linear Wind Equation #######################"""
+###############################################################################################
 ## Make play data for height of loglin model
 #height = np.arange(10,201,1)
+
 m_z = [] 
-
-
 ## I hate this loop its slow and stupid
 for i in range(len(z_list)):
     m_z_i = wind_eq.loglin_stable(stable.UST,z_list[i],stable.L)
@@ -315,25 +311,50 @@ for i in range(len(z_list)):
 m_z = np.stack(m_z)
 
 ## Add to Stable DataArray
-stable.update({'m_z_login':(('time','z'), m_z.T)})
+stable.update({'mz_stable':(('time','z'), m_z.T)})
 
-wsp_mz = np.array(stable.m_z_login)
+## Remove any odd negative values...some occur and I dont know why 
+stable = stable.where((stable.mz_stable > 0), drop=False)
+
 
 
 # %% 
 
-### Solve of the Obukhov length
-### Old method may delete !!!!!!!!!!
-#L = wind_eq.obukhov_len(stable.UST,stable.TA[:,-1],stable.F_sfc)
+###############################################################################################
+"""####################### Plot Stable Conditions mean and do Stats  ############################"""
+###############################################################################################
 
-#l_ob = np.array(L)
+fig, ax = plt.subplots(1,1, figsize=(12,10))
+fig.suptitle('Log Linear Wind Profile in Stable Surface Layer \n Average 2001 - 2018', fontsize= plt_set.title_size, fontweight="bold")
+
+ax.scatter(stable.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
+ax.plot(stable.mz_stable.mean(dim='time'),z_list, color = 'k', label = 'model')
+
+ax.set_xlabel("Wind Speed $(ms^-1)$", fontsize= plt_set.label)
+ax.set_ylabel("Height Above Ground Level  \n (AGL)", fontsize= plt_set.label)
+ax.tick_params(axis='both', which='major', labelsize= plt_set.tick_size)
+ax.xaxis.grid(color='gray', linestyle='dashed')
+ax.yaxis.grid(color='gray', linestyle='dashed')
+ax.set_facecolor('lightgrey')
+ax.legend(loc='best')
+   
+fig.savefig(save + 'Log_Linear_Wind_Profile_Stable_Surface_Layer')
 
 
+# %% [markdown]
+
+# # Solve for wind speed at height in nutral conditions using Log  Wind Equation
+
+# ##### $$M(z) = ({u_*} / k) * ln(z/z_o)$$ 
+# %% 
+
+###############################################################################################
+"""################## Nutrual Conditions using Linear Wind Equation #######################"""
+###############################################################################################
 
 ## Make play data for height of loglin model
 #height = np.arange(10,201,1)
 m_z = [] 
-
 
 ## I hate this loop its slow and stupid
 for i in range(len(z_list)):
@@ -344,27 +365,17 @@ m_z = np.stack(m_z)
 ## Add to Stable DataArray
 nutral.update({'mz_neutral':(('time','z'), m_z.T)})
 
-#wsp_mz = np.array(stable.m_z_login)
-
-# %% [markdown]
-#
-# # Plot of stable surface layer. 
-
-#stable.TA.plot(x = 'time')
-
+## Remove any odd negative values...some occur and I dont know why 
+nutral = nutral.where((stable.mz_stable > 0), drop=False)
 
 # %%
 
 fig, ax = plt.subplots(1,1, figsize=(12,10))
 fig.suptitle('Log Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
 
-#ax.scatter(stable.F[206,:],z_list, color = 'red', marker='+')
-#ax.plot(stable.m_z_login[206,:],z_list, color = 'k')
-#ax.plot(stable.time,stable.TA[:,4], color = 'k')
 
-
-ax.scatter(nutral.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'tower')
-ax.plot(nutral.mz_neutral.mean(dim='time'),z_list, color = 'k', label = ')
+ax.scatter(nutral.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
+ax.plot(nutral.mz_neutral.mean(dim='time'),z_list, color = 'k', label = 'model')
 
 ax.set_xlabel("Wind Speed $(ms^-1)$", fontsize= plt_set.label)
 ax.set_ylabel("Height Above Ground Level  \n (AGL)", fontsize= plt_set.label)
@@ -372,11 +383,9 @@ ax.tick_params(axis='both', which='major', labelsize= plt_set.tick_size)
 ax.xaxis.grid(color='gray', linestyle='dashed')
 ax.yaxis.grid(color='gray', linestyle='dashed')
 ax.set_facecolor('lightgrey')
-#    ax.legend(loc='best')
-#ax.legend(loc='upper right', bbox_to_anchor=(.80,1.0), shadow=True, ncol=6, title='Height AGL (meters)')
+ax.legend(loc='best')
    
-#
-
+fig.savefig(save + 'Log_Wind_Profile_Nutrual_Surface_Layer')
 
 # %% [markdown]
 #
