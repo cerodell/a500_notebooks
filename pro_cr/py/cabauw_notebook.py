@@ -112,18 +112,18 @@ fig.savefig(save + 'Avg_Wind_Speed_Profile')
 """########################## Time avereage wind speed profile ############################"""
 ###############################################################################################
 ### Group by hour
-avg_hour = var_ds.groupby('time.hour').mean(dim='time')
-
-datetime = np.array(avg_hour.hour)
-z_list = np.array(avg_hour.z)
-z_str = [str(i) for i in z_list]
-
-print(z_str[0][:-2])
-
-fig, ax = plt.subplots(1,1, figsize=(12,10))
-fig.suptitle('Hourly Time Averaged Temperaure Profile \n 2001 - 2019 ', fontsize= plt_set.title_size, fontweight="bold")
-# Get array of Time Averaged Wind Speed
-wsp = np.array(avg_hour.F)
+#avg_hour = var_ds.groupby('time.hour').mean(dim='time')
+#
+#datetime = np.array(avg_hour.hour)
+#z_list = np.array(avg_hour.z)
+#z_str = [str(i) for i in z_list]
+#
+#print(z_str[0][:-2])
+#
+#fig, ax = plt.subplots(1,1, figsize=(12,10))
+#fig.suptitle('Hourly Time Averaged Temperaure Profile \n 2001 - 2019 ', fontsize= plt_set.title_size, fontweight="bold")
+## Get array of Time Averaged Wind Speed
+#wsp = np.array(avg_hour.F)
 
 #for i in range(len(z_list)-1):
 #    ax.plot(datetime, avg_hour.TA[:,i] , label = z_str[i][:-2])
