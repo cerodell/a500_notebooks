@@ -280,14 +280,42 @@ np.warnings.filterwarnings('ignore')
 ## Apply conditional statements
 stable_i = var_ds.where((meso_ds.dTdz_mean < 0), drop=False)
 
-unstable = var_ds.where(meso_ds.dTdz_mean > 0.01 , drop=False)
+nutral_i = var_ds.where((meso_ds.dTdz_mean > 0) & (meso_ds.dTdz_mean < 0.006), drop=False)
 
-nutral = var_ds.where((meso_ds.dTdz_mean > 0) & (meso_ds.dTdz_mean < 0.006), drop=False)
+unstable_i = var_ds.where(meso_ds.dTdz_mean > 0.01 , drop=False)
 
 
-#uts = np.array(stable.UST)
-#wsp = np.array(stable.F)
-#l_ob = np.array(stable.L)
+## Print How Many Times each stability condition occurs
+sum_me = np.array(stable_i.F[:,-4])
+stable_non_nans = (~np.isnan(sum_me)).sum()
+print(f'We have {stable_non_nans} number of times of a Stable BL')
+
+
+sum_me = np.array(nutral_i.F[:,-4])
+nutral_non_nans = (~np.isnan(sum_me)).sum()
+print(f'We have {nutral_non_nans} number of times of a Nutral BL')
+
+
+sum_me = np.array(unstable_i.F[:,-4])
+unstable_non_nans = (~np.isnan(sum_me)).sum()
+print(f'We have {unstable_non_nans} number of times of a Unstable BL')
+
+# %% [markdown]
+
+# # Show the Distribution of dT/dz for each stability conditon
+
+
+# %% 
+
+f, axes = plt.subplots(1, 3, figsize=(16, 8), sharex=True)
+sns.kdeplot(stable_i.dTdz_mean, shade=True, color="r", ax=axes[0], label = 'Stable')
+sns.kdeplot(nutral_i.dTdz_mean, shade=True, color="b", ax=axes[1], label = 'Nutral')
+sns.kdeplot(unstable_i.dTdz_mean, shade=True, color="g", ax=axes[2], label = 'Unstable')
+sns.set_style("darkgrid", {"axes.facecolor": ".9"})
+#sns.plt.xlim(-0.1,0.1)
+
+
+
 
 # %% [markdown]
 
@@ -317,6 +345,9 @@ stable_i.update({'mz_stable':(('time','z'), m_z.T)})
 stable = stable_i.where((stable_i.mz_stable > 0) & (stable_i.mz_stable < 40), drop=False)
 #stable.where(stable.mz_stable > 0, drop=False)
 
+#sum_me = np.array(stable.F[:,-4])
+#stable_non_nans = (~np.isnan(sum_me)).sum()
+#print(f'We have {stable_non_nans} number of times of a Stable BL')
 
 
 # %% 
@@ -343,8 +374,7 @@ fig.savefig(save + 'Log_Linear_Wind_Profile_Stable_Surface_Layer')
 
 
 # %%
-#fig, ax = plt.subplots(1,1, figsize=(12,10))
-#fig.suptitle('Log Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
+## Hexbin plot or 2D histogram
 sns.jointplot(x= stable.F, y= stable.mz_stable, kind='hex', bins=15)
 
 # %% [markdown]
@@ -364,15 +394,20 @@ m_z = []
 
 ## I hate this loop its slow and stupid
 for i in range(len(z_list)):
-    m_z_i = wind_eq.logwind_neutral(nutral.UST,z_list[i])
+    m_z_i = wind_eq.logwind_neutral(nutral_i.UST,z_list[i])
     m_z.append(m_z_i)
 m_z = np.stack(m_z)
 
 ## Add to Stable DataArray
-nutral.update({'mz_neutral':(('time','z'), m_z.T)})
+nutral_i.update({'mz_neutral':(('time','z'), m_z.T)})
 
 ## Remove any odd negative values...some occur and I dont know why 
-nutral = nutral.where((nutral.mz_neutral > 0), drop=False)
+nutral = nutral_i.where((nutral_i.mz_neutral > 0), drop=False)
+
+#sum_me = np.array(nutral.F[:,-4])
+#nutral_non_nans = (~np.isnan(sum_me)).sum()
+#print(f'We have {nutral_non_nans} number of times of a Nutral BL')
+
 
 # %%
 
@@ -397,10 +432,8 @@ ax.legend(loc='best')
 fig.savefig(save + 'Log_Wind_Profile_Nutrual_Surface_Layer')
 
 # %%
-#fig, ax = plt.subplots(1,1, figsize=(12,10))
-#fig.suptitle('Log Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
+## Hexbin plot or 2D histogram
 sns.jointplot(x= nutral.F, y= nutral.mz_neutral, kind='hex', bins=15)
-
 
 # %% [markdown]
 #
@@ -433,6 +466,9 @@ unstable.update({'mz_unstable':(('time','z'), m_z.T)})
 ## Remove any odd negative values...some occur and I dont know why 
 unstable = unstable.where((unstable.mz_unstable > 0), drop=False)
 
+sum_me = np.array(unstable.F[:,-4])
+unstable_non_nans = (~np.isnan(sum_me)).sum()
+print(f'We have {unstable_non_nans} number of times of a Unstable BL')
 
 
 # %% [markdown]
