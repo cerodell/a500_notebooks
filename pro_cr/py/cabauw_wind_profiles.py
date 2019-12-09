@@ -130,10 +130,6 @@ grad_dtdz_mean = np.mean(grad_dtdz, axis =1)
 var_ds.update({'dTdz_mean':(('time'), grad_dtdz_mean)})
 var_ds.update({'dTdz':(('time','z'), grad_dtdz)})
 
-## Drop any and all rain events
-#meso_ds_i = var_ds.where((var_ds.RAIN < 0.0001), drop=False)
-min_u_str, max_u_str = np.nanmin(var_ds.UST), np.nanmax(var_ds.UST)
-print(f"Min UST {min_u_str} ms^-1 & Max UST {max_u_str} ms^-1")
 
 ## Drop any and all rain events
 meso_ds_i = var_ds.where((var_ds.RAIN < 0.0001), drop=False)
@@ -350,38 +346,48 @@ z_i = np.random.uniform(low=180., high=250, size=(lengeth,))
 unstable_ii.update({'w_str':(('time'), w_str)})
 unstable_ii.update({'z_i':(('time'), z_i)})
 
+
+## Make U_str not equal zero
+unstable_iii = unstable_ii.where((unstable_ii.UST > 0.000001), drop=False)
+min_u_str, max_u_str = np.nanmin(unstable_iii.UST), np.nanmax(unstable_iii.UST)
+print(f"Min UST {min_u_str} ms^-1 & Max UST {max_u_str} ms^-1")
+
+
+# %% 
+
 dim = [] 
 
 ## I hate this loop its slow and stupid
 for i in range(len(z_list)):
-    dim_i = wind_eq.dimRxL(unstable_ii.w_str,unstable_ii.UST, z_list[i], unstable_ii.z_i)
+    dim_i = wind_eq.dimRxL(unstable_iii.w_str,unstable_iii.UST, z_list[i], unstable_iii.z_i)
     dim.append(dim_i)
 
 dim_stack = np.stack(dim)
 
-## Add to Stable DataArray
-unstable_ii.update({'dim':(('time','z'), dim_stack.T)})
+## Add dim to data array
+unstable_iii.update({'dim':(('time','z'), dim_stack.T)})
 
 ### Drop any and all dim events less than zero or greater than 1
-unstable_iii = unstable_ii.where((unstable_ii.dim > 0) & (unstable_ii.dim < 100000), drop=False)
+unstable_iv = unstable_iii.where((unstable_iii.dim > 0) & (unstable_iii.dim < 100000), drop=False)
+min_dim, max_dim = np.nanmin(unstable_iv.dim), np.nanmax(unstable_iv.dim)
+print(f"Min Dim {min_dim} & Max Dim {max_dim}")
 
-min_rain, max_rain = np.nanmin(unstable_iii.dim), np.nanmax(unstable_iii.dim)
-print(f"Min Dim {min_rain} cm & Max Dim {max_rain}")
-#
-sum_me = np.array(unstable_iii.F[:,-4])
+##Check to see how many cases we have left
+sum_me = np.array(unstable_iv.F[:,-4])
 unstable_non_nans = (~np.isnan(sum_me)).sum()
 print(f'We have {unstable_non_nans} number of times of a Unstable BL')
 
-mz_unstable = wind_eq.RxL(unstable_iii.dim,unstable_iii.F[:,0])
+## Solve for wsp using the radix wind eq!!!
+mz_unstable = wind_eq.RxL(unstable_iv.dim,unstable_iv.F[:,0])
 
-### Add to Stable DataArray
-unstable_iii.update({'mz_unstable':(('time','z'), mz_unstable)})
-#unstable_iv  = unstable_iii.where(unstable_iii.dim.any() > 1 ,unstable_iii.mz_unstable.any(), unstable_iii.F[:,0].any())
+### Add to radix eq derived wsp to DataArray
+unstable_iv.update({'mz_unstable':(('time','z'), mz_unstable)})
 
 
 ### Remove any odd negative values...some occur and I dont know why 
-unstable = unstable_iii.where((unstable_iii.mz_unstable > 0), drop=False)
+unstable = unstable_iv.where((unstable_iv.mz_unstable > 0), drop=False)
 
+##Check to see how many cases we have left
 sum_me = np.array(unstable.F[:,-4])
 unstable_non_nans = (~np.isnan(sum_me)).sum()
 print(f'We have {unstable_non_nans} number of times of a Unstable BL')
@@ -394,10 +400,10 @@ print(f'We have {unstable_non_nans} number of times of a Unstable BL')
 
 # %% 
 ## Drop any and all rain events
-min_dim, max_dim, max_dim_ave = np.nanmin(unstable.dim), np.nanmax(unstable.dim), np.nanmean(unstable.dim)
-print(f"Min Dim {min_rain} cm & Max Dim {max_rain} & Avg Dim {max_dim_ave}")
+min_dim, max_dim, max_dim_ave = round(np.nanmin(unstable.dim),3), round(np.nanmax(unstable.dim),3), round(np.nanmean(unstable.dim),3)
+print(f"Min Dim {min_dim} & Max Dim {max_dim} & Avg Dim {max_dim_ave}")
 
-min_mz_unstable, max_mz_unstable = np.nanmin(unstable.mz_unstable), np.nanmax(unstable.mz_unstable)
+min_mz_unstable, max_mz_unstable = round(np.nanmin(unstable.mz_unstable),3), round(np.nanmax(unstable.mz_unstable),3)
 print(f"Min mz {min_mz_unstable} cm & Max mz {max_mz_unstable}")
 
 # %%
