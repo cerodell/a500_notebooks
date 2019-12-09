@@ -25,7 +25,7 @@ def RxL(dim,m_bl):
     '''   
     m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1-dim**constants.D))
     m_z = np.array(m_z)
-    return m_z, dim
+    return m_z
 
 
 #def RxL(w_str,u_str,z,z_i,m_bl):  

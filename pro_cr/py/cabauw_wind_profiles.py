@@ -130,6 +130,10 @@ grad_dtdz_mean = np.mean(grad_dtdz, axis =1)
 var_ds.update({'dTdz_mean':(('time'), grad_dtdz_mean)})
 var_ds.update({'dTdz':(('time','z'), grad_dtdz)})
 
+## Drop any and all rain events
+#meso_ds_i = var_ds.where((var_ds.RAIN < 0.0001), drop=False)
+min_u_str, max_u_str = np.nanmin(var_ds.UST), np.nanmax(var_ds.UST)
+print(f"Min UST {min_u_str} ms^-1 & Max UST {max_u_str} ms^-1")
 
 ## Drop any and all rain events
 meso_ds_i = var_ds.where((var_ds.RAIN < 0.0001), drop=False)
@@ -185,21 +189,6 @@ to my other arropch to define stability
 #unstable_i = var_ds.where(meso_ds.phi < 0. , drop=False)
 """
 
-## Print How Many Times each stability condition occurs
-#sum_me = np.array(stable_i.F[:,-4])
-#stable_non_nans = (~np.isnan(sum_me)).sum()
-#print(f'We have {stable_non_nans} number of times of a Stable BL')
-#
-#
-#sum_me = np.array(nutral_i.F[:,-4])
-#nutral_non_nans = (~np.isnan(sum_me)).sum()
-#print(f'We have {nutral_non_nans} number of times of a Nutral BL')
-#
-#
-#sum_me = np.array(unstable_ii.F[:,-4])
-#unstable_non_nans = (~np.isnan(sum_me)).sum()
-#print(f'We have {unstable_non_nans} number of times of a Unstable BL')
-
 
 # %% [markdown]
 
@@ -213,7 +202,6 @@ sns.kdeplot(stable_i.dTdz_mean, shade=True, color="r", ax=axes[0], label = 'Stab
 sns.kdeplot(nutral_i.dTdz_mean, shade=True, color="b", ax=axes[1], label = 'Nutral')
 sns.kdeplot(unstable_i.dTdz_mean, shade=True, color="g", ax=axes[2], label = 'Unstable')
 sns.set_style("darkgrid", {"axes.facecolor": ".9"})
-
 
 
 
@@ -374,29 +362,29 @@ dim_stack = np.stack(dim)
 ## Add to Stable DataArray
 unstable_ii.update({'dim':(('time','z'), dim_stack.T)})
 
-unstable_iii = unstable_ii.where((unstable_ii.dim > 0) & (unstable_ii.dim < 1 ), drop=False)
+### Drop any and all dim events less than zero or greater than 1
+unstable_iii = unstable_ii.where((unstable_ii.dim > 0) & (unstable_ii.dim < 100000), drop=False)
 
-
-dim = [] 
-
-## I hate this loop its slow and stupid
-for i in range(len(z_list)):
-    dim_i = wind_eq.dimRxL(unstable_ii.w_str,unstable_ii.UST, z_list[i], unstable_ii.z_i)
-    dim.append(dim_i)
-
-
-#mz_unstable = np.stack(m_z)
+min_rain, max_rain = np.nanmin(unstable_iii.dim), np.nanmax(unstable_iii.dim)
+print(f"Min Dim {min_rain} cm & Max Dim {max_rain}")
 #
+sum_me = np.array(unstable_iii.F[:,-4])
+unstable_non_nans = (~np.isnan(sum_me)).sum()
+print(f'We have {unstable_non_nans} number of times of a Unstable BL')
+
+mz_unstable = wind_eq.RxL(unstable_iii.dim,unstable_iii.F[:,0])
+
 ### Add to Stable DataArray
-#unstable_ii.update({'mz_unstable':(('time','z'), mz_unstable.T)})
-#
+unstable_iii.update({'mz_unstable':(('time','z'), mz_unstable)})
+#unstable_iv  = unstable_iii.where(unstable_iii.dim.any() > 1 ,unstable_iii.mz_unstable.any(), unstable_iii.F[:,0].any())
+
+
 ### Remove any odd negative values...some occur and I dont know why 
-#unstable = unstable_ii.where((unstable_ii.mz_unstable > 0), drop=False)
-#
-##
-#sum_me = np.array(unstable.F[:,-4])
-#unstable_non_nans = (~np.isnan(sum_me)).sum()
-#print(f'We have {unstable_non_nans} number of times of a Unstable BL')
+unstable = unstable_iii.where((unstable_iii.mz_unstable > 0), drop=False)
+
+sum_me = np.array(unstable.F[:,-4])
+unstable_non_nans = (~np.isnan(sum_me)).sum()
+print(f'We have {unstable_non_nans} number of times of a Unstable BL')
 
 
 # %% [markdown]
@@ -406,10 +394,10 @@ for i in range(len(z_list)):
 
 # %% 
 ## Drop any and all rain events
-min_rain, max_rain = np.nanmin(dim_stack), np.nanmax(dim_stack)
-print(f"Min Dim {min_rain} cm & Max Dim {max_rain}")
+min_dim, max_dim, max_dim_ave = np.nanmin(unstable.dim), np.nanmax(unstable.dim), np.nanmean(unstable.dim)
+print(f"Min Dim {min_rain} cm & Max Dim {max_rain} & Avg Dim {max_dim_ave}")
 
-min_mz_unstable, max_mz_unstable = np.nanmin(mz_unstable), np.nanmax(mz_unstable)
+min_mz_unstable, max_mz_unstable = np.nanmin(unstable.mz_unstable), np.nanmax(unstable.mz_unstable)
 print(f"Min mz {min_mz_unstable} cm & Max mz {max_mz_unstable}")
 
 # %%
