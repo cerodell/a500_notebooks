@@ -1,3 +1,12 @@
+
+"""
+@author: rodell
+
+This script test that the relative paths in the pro_cr repository are working
+
+"""
+
+
 import context
 import a500
 from cr500.utils.sumdef import summe

@@ -1,3 +1,11 @@
+"""
+@author: rodell
+
+This script has constants needed for throughout pro_cr mini repository 
+
+
+"""
+
 ### A-D used for the Radix Layer
 A = (1/4)
 B = (3/4)

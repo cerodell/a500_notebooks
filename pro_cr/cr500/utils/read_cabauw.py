@@ -3,6 +3,10 @@
 """
 Created on Sat Nov 23 10:54:24 2019
 
+This script to read  NetCDF files for a variety of instruments from
+the Cabauw study site and compile them into a list dictionary formatted
+to be converted to Xarray.
+
 @author: rodell
 """
 
@@ -11,16 +15,8 @@ from netCDF4 import Dataset
 from dateutil.parser import parse
 import datetime
 import numpy as np
-#import urllib,os
-#import context
-#from pathlib import Path
-#import cr500
 from cr500.utils import ncdump
 from pytz import utc
-
-#import numpy as np
-#from bs4 import BeautifulSoup
-#import requests
 import xarray as xr
 
 
@@ -228,14 +224,14 @@ def read_doppler(files):
 
     
 #                        dims = f.variables[var].dimensions
-                        dims = ('time','z')
+                        dims = ('time','z_doppler')
                         dop_dict.update({var : (dims,np.array(array))})
                             
                     for var in ['height_1st_interval']:
                         var_array = f.variables[var][...]
                         array = np.array(var_array, dtype=float)
 
-                        dims = ('z')
+                        dims = ('z_doppler')
                         dop_dict.update({var : (dims,np.array(array))})   
                         
                     time_vec, dims = maketime(f)        
@@ -250,7 +246,3 @@ def read_doppler(files):
     return(doppler_list)
                     
                     
-    
-#### delan triangelisaztion  !!!!
-    
-##    scip.interpolate.lineaNDinteripliato   gausinas progress regression (interplote error with )

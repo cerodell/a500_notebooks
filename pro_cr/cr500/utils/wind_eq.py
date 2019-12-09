@@ -1,5 +1,33 @@
+"""
+Created on Thu Nov 28 14:03:45 2019
+
+This script has functions of the wind profile equations 
+and the required key variables to solve for them.
+
+
+@author: rodell
+"""
+
+
 from cr500.utils import constants
 import numpy as np
+
+#def RxL(w_str,u_str,z,z_i,m_bl):  
+#    '''
+#    This Function is used for the wind profile in the Radix Layer
+#
+#    '''
+#    dim = (1/constants.C)*(z/z_i)*((w_str/u_str)**constants.B)
+#    if dim == np.NaN:
+#       m_z = np.NaN
+#    elif dim.all() < 1:
+#        m_z = m_bl
+#    else:
+#
+#        m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1-dim**constants.D))
+#        m_z = np.array(m_z)
+#        return m_z, dim
+
 
 def RxL(w_str,u_str,z,z_i,m_bl):  
     '''
@@ -7,14 +35,17 @@ def RxL(w_str,u_str,z,z_i,m_bl):
 
     '''
     dim = (1/constants.C)*(z/z_i)*((w_str/u_str)**constants.B)
-#    if dim > 1:
-#       m_z = m_bl
-#   else:
-    m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1-dim**constants.D))
-    m_z = np.array(m_z)
-    return m_z
+    if dim.all() == np.NaN:
+       m_z = np.NaN
+    elif dim.all() < 1:
+        m_z = m_bl
+    else:
 
-
+        m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1-dim**constants.D))
+        m_z = np.array(m_z)
+        return m_z, dim
+    
+    
 
 def w_str(thetav_avg,z_i,wtheta_peturb):
     '''
@@ -51,7 +82,7 @@ def logwind_neutral(u_str,z):
 
 
 def loglin_stable(u_str,z,L):
-    m_z = (u_str / constants.k) * (np.log(z / constants.z_o) + (6 * (z / L)))
+    m_z = (u_str / constants.k) * (np.log(z / constants.z_o) + (0.001 * (z / L)))
     return(m_z)
 
 
