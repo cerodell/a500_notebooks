@@ -12,38 +12,36 @@ and the required key variables to solve for them.
 from cr500.utils import constants
 import numpy as np
 
-#def RxL(w_str,u_str,z,z_i,m_bl):  
-#    '''
-#    This Function is used for the wind profile in the Radix Layer
-#
-#    '''
-#    dim = (1/constants.C)*(z/z_i)*((w_str/u_str)**constants.B)
-#    if dim == np.NaN:
-#       m_z = np.NaN
-#    elif dim.all() < 1:
-#        m_z = m_bl
-#    else:
-#
-#        m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1-dim**constants.D))
-#        m_z = np.array(m_z)
-#        return m_z, dim
 
+def dimRxL(w_str,u_str,z,z_i):
+    dim = (1/constants.C)*(z/z_i)*((w_str/u_str)**constants.B)
+    dim = np.array(dim)
+    return dim
 
-def RxL(w_str,u_str,z,z_i,m_bl):  
+def RxL(dim,m_bl):  
     '''
     This Function is used for the wind profile in the Radix Layer
 
-    '''
-    dim = (1/constants.C)*(z/z_i)*((w_str/u_str)**constants.B)
-    if dim.all() == np.NaN:
-       m_z = np.NaN
-    elif dim.all() < 1:
-        m_z = m_bl
-    else:
+    '''   
+    m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1-dim**constants.D))
+    m_z = np.array(m_z)
+    return m_z, dim
 
-        m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1-dim**constants.D))
-        m_z = np.array(m_z)
-        return m_z, dim
+
+#def RxL(w_str,u_str,z,z_i,m_bl):  
+#    '''
+#    This function is used for the wind profile in the Radix Layer
+#
+#    '''
+#    dim = (1/constants.C)*(z/z_i)*((w_str/u_str)**constants.B)
+#    if dim.all() == np.NaN:
+#       m_z = np.NaN
+#    elif dim.all() > 1:
+#        m_z = np.NaN
+#    else:
+#        m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1 - dim**constants.D))
+#        m_z = np.array(m_z)
+#        return m_z, dim
     
     
 

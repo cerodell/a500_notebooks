@@ -168,6 +168,10 @@ unstable_i.update({'dFdz':(('time','z'), grad_dfdz)})
 unstable_ii = unstable_i.where((unstable_i.dFdz[:,0] > -0.001) & (unstable_i.dFdz[:,0] < 0.001))
 
 
+"""
+I have been tesing this method and it yeild little differncec as comapred 
+to my other arropch to define stability
+
 ## Apply conditional statements
 #phi = (meso_ds.z[-1]/meso_ds.L)
 #meso_ds.update({'phi':(('time'), phi)})
@@ -179,22 +183,22 @@ unstable_ii = unstable_i.where((unstable_i.dFdz[:,0] > -0.001) & (unstable_i.dFd
 #nutral_i = var_ds.where(meso_ds.phi == 0, drop=False)
 #
 #unstable_i = var_ds.where(meso_ds.phi < 0. , drop=False)
-
+"""
 
 ## Print How Many Times each stability condition occurs
-sum_me = np.array(stable_i.F[:,-4])
-stable_non_nans = (~np.isnan(sum_me)).sum()
-print(f'We have {stable_non_nans} number of times of a Stable BL')
-
-
-sum_me = np.array(nutral_i.F[:,-4])
-nutral_non_nans = (~np.isnan(sum_me)).sum()
-print(f'We have {nutral_non_nans} number of times of a Nutral BL')
-
-
-sum_me = np.array(unstable_ii.F[:,-4])
-unstable_non_nans = (~np.isnan(sum_me)).sum()
-print(f'We have {unstable_non_nans} number of times of a Unstable BL')
+#sum_me = np.array(stable_i.F[:,-4])
+#stable_non_nans = (~np.isnan(sum_me)).sum()
+#print(f'We have {stable_non_nans} number of times of a Stable BL')
+#
+#
+#sum_me = np.array(nutral_i.F[:,-4])
+#nutral_non_nans = (~np.isnan(sum_me)).sum()
+#print(f'We have {nutral_non_nans} number of times of a Nutral BL')
+#
+#
+#sum_me = np.array(unstable_ii.F[:,-4])
+#unstable_non_nans = (~np.isnan(sum_me)).sum()
+#print(f'We have {unstable_non_nans} number of times of a Unstable BL')
 
 
 # %% [markdown]
@@ -239,11 +243,10 @@ stable_i.update({'mz_stable':(('time','z'), m_z.T)})
 
 ## Remove any odd negative values...some occur and I dont know why 
 stable = stable_i.where((stable_i.mz_stable > 0) & (stable_i.mz_stable < 40), drop=False)
-#stable.where(stable.mz_stable > 0, drop=False)
 
-#sum_me = np.array(stable.F[:,-4])
-#stable_non_nans = (~np.isnan(sum_me)).sum()
-#print(f'We have {stable_non_nans} number of times of a Stable BL')
+sum_me = np.array(stable.F[:,-4])
+stable_non_nans = (~np.isnan(sum_me)).sum()
+print(f'We have {stable_non_nans} number of times of a Stable BL')
 
 
 # %% 
@@ -302,9 +305,9 @@ nutral_i.update({'mz_neutral':(('time','z'), m_z.T)})
 ## Remove any odd negative values...some occur and I dont know why 
 nutral = nutral_i.where((nutral_i.mz_neutral > 0), drop=False)
 
-#sum_me = np.array(nutral.F[:,-4])
-#nutral_non_nans = (~np.isnan(sum_me)).sum()
-#print(f'We have {nutral_non_nans} number of times of a Nutral BL')
+sum_me = np.array(nutral.F[:,-4])
+nutral_non_nans = (~np.isnan(sum_me)).sum()
+print(f'We have {nutral_non_nans} number of times of a Nutral BL')
 
 
 # %%
@@ -359,27 +362,41 @@ z_i = np.random.uniform(low=180., high=250, size=(lengeth,))
 unstable_ii.update({'w_str':(('time'), w_str)})
 unstable_ii.update({'z_i':(('time'), z_i)})
 
-m_z, dim = [] , []
+dim = [] 
 
 ## I hate this loop its slow and stupid
 for i in range(len(z_list)):
-#    m_z_i = wind_eq.RxL(unstable_ii.w_str,unstable_ii.UST, z_list[i], unstable_ii.z_i, unstable_ii.F[:,0])
-    m_z_i, dim_i = wind_eq.RxL(2.,unstable_ii.UST, z_list[i], 200, unstable_ii.F[:,0])
-    m_z.append(m_z_i)
+    dim_i = wind_eq.dimRxL(unstable_ii.w_str,unstable_ii.UST, z_list[i], unstable_ii.z_i)
     dim.append(dim_i)
-  
+
 dim_stack = np.stack(dim)
-mz_unstable = np.stack(m_z)
 
 ## Add to Stable DataArray
-unstable_ii.update({'mz_unstable':(('time','z'), mz_unstable.T)})
+unstable_ii.update({'dim':(('time','z'), dim_stack.T)})
 
-## Remove any odd negative values...some occur and I dont know why 
-unstable = unstable_ii.where((unstable_ii.mz_unstable > 0), drop=False)
+unstable_iii = unstable_ii.where((unstable_ii.dim > 0) & (unstable_ii.dim < 1 ), drop=False)
+
+
+dim = [] 
+
+## I hate this loop its slow and stupid
+for i in range(len(z_list)):
+    dim_i = wind_eq.dimRxL(unstable_ii.w_str,unstable_ii.UST, z_list[i], unstable_ii.z_i)
+    dim.append(dim_i)
+
+
+#mz_unstable = np.stack(m_z)
 #
-sum_me = np.array(unstable.F[:,-4])
-unstable_non_nans = (~np.isnan(sum_me)).sum()
-print(f'We have {unstable_non_nans} number of times of a Unstable BL')
+### Add to Stable DataArray
+#unstable_ii.update({'mz_unstable':(('time','z'), mz_unstable.T)})
+#
+### Remove any odd negative values...some occur and I dont know why 
+#unstable = unstable_ii.where((unstable_ii.mz_unstable > 0), drop=False)
+#
+##
+#sum_me = np.array(unstable.F[:,-4])
+#unstable_non_nans = (~np.isnan(sum_me)).sum()
+#print(f'We have {unstable_non_nans} number of times of a Unstable BL')
 
 
 # %% [markdown]
@@ -388,6 +405,12 @@ print(f'We have {unstable_non_nans} number of times of a Unstable BL')
 
 
 # %% 
+## Drop any and all rain events
+min_rain, max_rain = np.nanmin(dim_stack), np.nanmax(dim_stack)
+print(f"Min Dim {min_rain} cm & Max Dim {max_rain}")
+
+min_mz_unstable, max_mz_unstable = np.nanmin(mz_unstable), np.nanmax(mz_unstable)
+print(f"Min mz {min_mz_unstable} cm & Max mz {max_mz_unstable}")
 
 # %%
 
@@ -408,6 +431,10 @@ ax.xaxis.grid(color='gray', linestyle='dashed')
 ax.yaxis.grid(color='gray', linestyle='dashed')
 ax.set_facecolor('lightgrey')
 ax.legend(loc='best')
+
+
+fig.savefig(save + 'Radix_Layer_Wind_Profile')
+
 
 # %%
 ## Hexbin plot or 2D histogram
