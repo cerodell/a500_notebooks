@@ -43,7 +43,7 @@ save = str(context.pro_data_dir)+str('/Images/')
 # %% [markdown]
 #
 # # Solve for Virtual Temperature, Air Density, Kinematic Sensible heat flux, and the Obukhov length ... add all to var_ds
-
+#
 # #### Should add the derivation with Latex
 # %%
 
@@ -102,7 +102,11 @@ z_str = [str(i) for i in z_list]
 #avg_hour_2018 = var_2018.groupby('time.hour').mean(dim='time')
 #
 #doppler_hour = doppler_ds.groupby('time.hour').mean(dim='time')
-#
+timedop = np.array(doppler_ds.time)
+dtime = np.diff(timedop)
+#plt.plot(dtime)
+#print(np.min(dtime))
+#ztime = np.sum(np.diff(timedop))
 #xarray_list = [avg_hour_2018, doppler_hour]
 #master_ds = xr.merge(xarray_list)
 #master_ds = xr.combine_nested(xarray_list, 'z')
@@ -143,7 +147,7 @@ print(f"Min Press {min_press} hPa & Max Press {max_press} hPa")
 
 
 # %% [markdown]
-
+#
 # ### Filtter for dirrefnt stability classes by comapring dT/dz to the dry adiabtic laps rate
 
 # %%
@@ -187,11 +191,11 @@ to my other arropch to define stability
 
 
 # %% [markdown]
-
+#
 # # Show the Distribution of dT/dz for each stability conditon
 
 
-# %% 
+# %%
 
 f, axes = plt.subplots(1, 3, figsize=(16, 8), sharex=True)
 sns.kdeplot(stable_i.dTdz_mean, shade=True, color="r", ax=axes[0], label = 'Stable')
@@ -202,12 +206,12 @@ sns.set_style("darkgrid", {"axes.facecolor": ".9"})
 
 
 # %% [markdown]
-
+#
 # # Solve for wind speed at height in stable conditions using Log Linear Wind Equation
-
+#
 # ### $$M(z) = ({u_*} / k) * [ln(z/z_o) + 6 * (z/L)]$$ 
 
-# %% 
+# %%
 
 ###############################################################################################
 """################## Stable Conditions using Log Linear Wind Equation #######################"""
@@ -233,14 +237,14 @@ stable_non_nans = (~np.isnan(sum_me)).sum()
 print(f'We have {stable_non_nans} number of times of a Stable BL')
 
 
-# %% 
+# %%
 
 ###############################################################################################
 """####################### Plot Stable Conditions mean and do Stats  #########################"""
 ###############################################################################################
 
 fig, ax = plt.subplots(1,1, figsize=(12,10))
-fig.suptitle('Log Linear Wind Profile in Stable Surface Layer \n Average 2001 - 2018', fontsize= plt_set.title_size, fontweight="bold")
+fig.suptitle('Wind Profile in Stable Surface Layer \n Average 2001 - 2018', fontsize= plt_set.title_size, fontweight="bold")
 
 ax.scatter(stable.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
 ax.plot(stable.mz_stable.mean(dim='time'),z_list, color = 'k', label = 'model')
@@ -253,21 +257,25 @@ ax.yaxis.grid(color='gray', linestyle='dashed')
 ax.set_facecolor('lightgrey')
 ax.legend(loc='best')
    
-fig.savefig(save + 'Log_Linear_Wind_Profile_Stable_Surface_Layer')
+fig.savefig(save + 'Stable_Surface_Layer')
 
 
 # %%
 ## Hexbin plot or 2D histogram
 j = sns.jointplot(x= stable.F, y= stable.mz_stable, kind='hex', bins=15)
 j.annotate(stats.pearsonr)
+j.fig.set_size_inches(8,8)
+plt.subplots_adjust(top=0.9)
+j.fig.suptitle('Stable Conditions \n  Log Linear Wind Eq (model) to Observation (in-situ)')
+j.savefig(save + "Stats_Stable.png")
 
 
 # %% [markdown]
-
+#
 # # Solve for wind speed at height in nutral conditions using Log  Wind Equation
-
+#
 # ### $$M(z) = ({u_*} / k) * ln(z/z_o)$$ 
-# %% 
+# %%
 
 ###############################################################################################
 """################## Nutrual Conditions using Linear Wind Equation #######################"""
@@ -300,7 +308,7 @@ print(f'We have {nutral_non_nans} number of times of a Nutral BL')
 """####################### Plot Neutral Conditions mean and do Stats  #########################"""
 ###############################################################################################
 fig, ax = plt.subplots(1,1, figsize=(12,10))
-fig.suptitle('Log Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
+fig.suptitle('Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
 
 
 ax.scatter(nutral.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
@@ -314,23 +322,27 @@ ax.yaxis.grid(color='gray', linestyle='dashed')
 ax.set_facecolor('lightgrey')
 ax.legend(loc='best')
    
-fig.savefig(save + 'Log_Wind_Profile_Nutrual_Surface_Layer')
+fig.savefig(save + 'Nutrual_Surface_Layer')
 
 # %%
 ## Hexbin plot or 2D histogram
 j = sns.jointplot(x= nutral.F, y= nutral.mz_neutral, kind='hex', bins=10)
 j.annotate(stats.pearsonr)
+j.fig.set_size_inches(8,8)
+plt.subplots_adjust(top=0.9)
+j.fig.suptitle('Nutrual Conditions \n Log Wind Eq (model) to Observation (in-situ)')
+j.savefig(save + "Stats_Nutrual.png")
 
 
 # %% [markdown]
 #
 # # Apply conditional statements to var_ds to find a time of stable unstable surface layer. 
-
+#
 # ### $$M(z) = M_B * (({\zeta}^D)^A)*exp[A*(1-\zeta ^D)]$$
 # ### $$\zeta = (1/C)*(z/z_i)*(w_*/u_*)^B$$
 
 
-# %% 
+# %%
 
 ###############################################################################################
 """################## Unstable Conditions using Radix Wind Equation #######################"""
@@ -353,7 +365,7 @@ min_u_str, max_u_str = np.nanmin(unstable_iii.UST), np.nanmax(unstable_iii.UST)
 print(f"Min UST {min_u_str} ms^-1 & Max UST {max_u_str} ms^-1")
 
 
-# %% 
+# %%
 
 dim = [] 
 
@@ -398,7 +410,7 @@ print(f'We have {unstable_non_nans} number of times of a Unstable BL')
 # # Apply conditional statements to var_ds to find  natural surface layer. 
 
 
-# %% 
+# %%
 ## Drop any and all rain events
 min_dim, max_dim, max_dim_ave = round(np.nanmin(unstable.dim),3), round(np.nanmax(unstable.dim),3), round(np.nanmean(unstable.dim),3)
 print(f"Min Dim {min_dim} & Max Dim {max_dim} & Avg Dim {max_dim_ave}")
@@ -412,7 +424,7 @@ print(f"Min mz {min_mz_unstable} cm & Max mz {max_mz_unstable}")
 """####################### Plot Unstable Conditions mean and do Stats  #########################"""
 ###############################################################################################
 fig, ax = plt.subplots(1,1, figsize=(12,10))
-fig.suptitle('Log Wind Profile in Unstable Radix Layer', fontsize= plt_set.title_size, fontweight="bold")
+fig.suptitle('Wind Profile in Unstable Radix Layer', fontsize= plt_set.title_size, fontweight="bold")
 
 
 ax.scatter(unstable.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
@@ -427,13 +439,19 @@ ax.set_facecolor('lightgrey')
 ax.legend(loc='best')
 
 
-fig.savefig(save + 'Radix_Layer_Wind_Profile')
+fig.savefig(save + 'Unstable_Wind_Profile')
 
 
 # %%
 ## Hexbin plot or 2D histogram
+
+#sns.set(rc={'figure.figsize':(11.7,8.27)})
 j = sns.jointplot(x= unstable.F, y= unstable.mz_unstable, kind='hex', bins=10)
 j.annotate(stats.pearsonr)
+j.fig.set_size_inches(8,8)
+plt.subplots_adjust(top=0.9)
+j.fig.suptitle('Unstable Conditions \n Radix Eq (model) to Observation (in-situ)')
+j.savefig(save + "Stats_Unstable.png")
 
 
 
