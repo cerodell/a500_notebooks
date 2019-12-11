@@ -23,25 +23,21 @@ def RxL(dim,m_bl):
     This Function is used for the wind profile in the Radix Layer
 
     '''   
-    m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1-dim**constants.D))
+    m_z = m_bl * (((dim**constants.D)**constants.A) * np.exp(constants.A*(1 - (dim**constants.D))))
     m_z = np.array(m_z)
     return m_z
 
 
-#def RxL(w_str,u_str,z,z_i,m_bl):  
-#    '''
-#    This function is used for the wind profile in the Radix Layer
-#
-#    '''
-#    dim = (1/constants.C)*(z/z_i)*((w_str/u_str)**constants.B)
-#    if dim.all() == np.NaN:
-#       m_z = np.NaN
-#    elif dim.all() > 1:
-#        m_z = np.NaN
-#    else:
-#        m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1 - dim**constants.D))
-#        m_z = np.array(m_z)
-#        return m_z, dim
+def RxLtest(w_str,u_str,z,z_i,m_bl):  
+    '''
+    This function is used for the wind profile in the Radix Layer
+
+    '''
+    dim = (1/constants.C)*(z/z_i)*((w_str/u_str)**constants.B)
+    m_z = m_bl * ((dim**constants.D)**constants.A) * np.exp(constants.A*(1 - dim**constants.D))
+    m_z = np.array(m_z)
+    
+    return m_z, dim
     
     
 
