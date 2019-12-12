@@ -13,7 +13,7 @@ Created on Thu Nov 28 14:03:45 2019
 @author: rodell
 """
 
-from cr500.utils import plt_set, constants, wind_eq
+from cr500.utils import plt_set, constants, wind_eq, read_cabauw
 from scipy.optimize import curve_fit
 from matplotlib import pyplot as plt
 import scipy.stats as stats
@@ -232,20 +232,25 @@ sns.set_style("darkgrid", {"axes.facecolor": ".9"})
 m_z = [] 
 ## I hate this loop its slow and stupid
 for i in range(len(z_list)):
-    m_z_i = wind_eq.loglin_stable(stable_i.UST,z_list[i],stable_i.L)
+    m_z_i = wind_eq.loglin_stable(np.array(stable_i.UST),z_list[i],np.array(stable_i.L))
     m_z.append(m_z_i)
 m_z = np.stack(m_z)
+m_z[m_z < 0] = np.nan
 
 ## Add to Stable DataArray
 stable_i.update({'mz_stable':(('time','z'), m_z.T)})
 
 ## Remove any odd negative values...some occur and I dont know why 
-stable = stable_i.where((stable_i.mz_stable > 0) & (stable_i.mz_stable < 40), drop=False)
+#stable = stable_i.where((stable_i.mz_stable > 0) & (stable_i.mz_stable < 40), drop=False)
+stable = stable_i
 
 sum_me = np.array(stable.F[:,-4])
 stable_non_nans = (~np.isnan(sum_me)).sum()
 print(f'We have {stable_non_nans} number of times of a Stable BL')
 
+# %% [markdown]
+#
+# # Plot the mean wind speed at height for all stable conditions using Log Linear Wind Equation
 
 # %%
 
@@ -256,7 +261,8 @@ print(f'We have {stable_non_nans} number of times of a Stable BL')
 fig, ax = plt.subplots(1,1, figsize=(12,10))
 fig.suptitle('Wind Profile in Stable Surface Layer \n Average 2001 - 2018', fontsize= plt_set.title_size, fontweight="bold")
 
-ax.scatter(stable.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
+#ax.scatter(stable.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
+ax.plot(stable.F.mean(dim='time'),z_list, color = 'red', linestyle = '--', label = 'in-situ')
 ax.plot(stable.mz_stable.mean(dim='time'),z_list, color = 'k', label = 'model')
 
 ax.set_xlabel("Wind Speed $(ms^-1)$", fontsize= plt_set.label)
@@ -270,6 +276,10 @@ ax.legend(loc='best')
 fig.savefig(save + 'Stable_Surface_Layer')
 
 
+# %% [markdown]
+#
+# # Compare the Log Linear Wind Equation to Obervational Tower Data  in a Stable ABL
+
 # %%
 ## Hexbin plot or 2D histogram
 j = sns.jointplot(x= stable.F, y= stable.mz_stable, kind='hex', bins=15)
@@ -278,12 +288,6 @@ j.fig.set_size_inches(8,8)
 plt.subplots_adjust(top=0.9)
 j.fig.suptitle('Stable Conditions \n  Log Linear Wind Eq (model) to Observation (in-situ)')
 j.savefig(save + "Stats_Stable.png")
-
-
-
-
-
-
 
 
 # %% [markdown]
@@ -306,16 +310,22 @@ for i in range(len(z_list)):
     m_z_i = wind_eq.logwind_neutral(nutral_i.UST,z_list[i])
     m_z.append(m_z_i)
 m_z = np.stack(m_z)
+m_z[m_z < 0] = np.nan
 
 ## Add to Stable DataArray
 nutral_i.update({'mz_neutral':(('time','z'), m_z.T)})
 
 ## Remove any odd negative values...some occur and I dont know why 
-nutral = nutral_i.where((nutral_i.mz_neutral > 0), drop=False)
-
+#nutral = nutral_i.where((nutral_i.mz_neutral > 0), drop=False)
+nutral = nutral_i
 sum_me = np.array(nutral.F[:,-4])
 nutral_non_nans = (~np.isnan(sum_me)).sum()
 print(f'We have {nutral_non_nans} number of times of a Nutral BL')
+
+
+# %% [markdown]
+#
+# # Plot the mean wind speed at height for all neutral conditions using Log Wind Equation and tower observations
 
 
 # %%
@@ -327,7 +337,8 @@ fig, ax = plt.subplots(1,1, figsize=(12,10))
 fig.suptitle('Wind Profile in Nutrual Surface Layer', fontsize= plt_set.title_size, fontweight="bold")
 
 
-ax.scatter(nutral.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
+#ax.scatter(nutral.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
+ax.plot(nutral.F.mean(dim='time'),z_list, color = 'red', linestyle='--', label = 'in-situ')
 ax.plot(nutral.mz_neutral.mean(dim='time'),z_list, color = 'k', label = 'model')
 
 ax.set_xlabel("Wind Speed $(ms^-1)$", fontsize= plt_set.label)
@@ -340,13 +351,17 @@ ax.legend(loc='best')
    
 fig.savefig(save + 'Nutrual_Surface_Layer')
 
+
+# %% [markdown]
+#
+# # Compare the Log Wind Equation to Obervational Tower Data  in a Neutral ABL
 # %%
 ## Hexbin plot or 2D histogram
 j = sns.jointplot(x= nutral.F, y= nutral.mz_neutral, kind='hex', bins=15)
 j.annotate(stats.pearsonr)
 j.fig.set_size_inches(8,8)
 plt.subplots_adjust(top=0.9)
-j.fig.suptitle('Nutrual Conditions \n Log Wind Eq (model) to Observation (in-situ)')
+j.fig.suptitle('Neutral Conditions \n Log Wind Eq (model) to Observation (in-situ)')
 j.savefig(save + "Stats_Nutrual.png")
 
 
@@ -357,6 +372,11 @@ j.savefig(save + "Stats_Nutrual.png")
 # ### $$M(z) = M_B * (({\zeta}^D)^A)*exp[A*(1-\zeta ^D)]$$
 # ### $$\zeta = (1/C)*(z/z_i)*(w_*/u_*)^B$$
 
+
+# %% [markdown]
+
+# ### Make dummy data for w_str casue i dont have any :(
+# ### Data range was taken from stulls Minessota field campaign
 
 # %%
 
@@ -370,133 +390,62 @@ j.savefig(save + "Stats_Nutrual.png")
 ## Data range was taken from stulls Minessota field campaign
 lengeth = len(np.array(unstable_ii.P0))
 w_str = np.random.uniform(low=1., high=3.5, size=(lengeth,))
-z_i = np.random.uniform(low=180., high=250, size=(lengeth,))
+z_i = np.random.uniform(low=140., high=150, size=(lengeth,))
 unstable_ii.update({'w_str':(('time'), w_str)})
 unstable_ii.update({'z_i':(('time'), z_i)})
 
-print(np.nanmax(unstable_ii.F[:,0]))
+#print(np.nanmax(unstable_ii.F[:,0]))
 
-## Make U_str not equal zero
+## Make U_str not equal zero causes calc to go to inf later :/
 unstable_iii = unstable_ii.where((unstable_ii.UST > 0.000001), drop=False)
 min_u_str, max_u_str = np.nanmin(unstable_iii.UST), np.nanmax(unstable_iii.UST)
 print(f"Min UST {min_u_str} ms^-1 & Max UST {max_u_str} ms^-1")
 
+
+# %% [markdown]
+
+# # Solve for wind in the Radix Layer
+
 # %%
 
-
-
-
-## Make play data for height of loglin model
-#height = np.arange(10,201,1)
-m_z, dim = [] , []
+dim = [] 
 
 ## I hate this loop its slow and stupid
 for i in range(len(z_list)):
-    mz_unstable, dim_i = wind_eq.RxLtest(unstable_iii.w_str, unstable_iii.UST, z_list[i],unstable_iii.z_i, unstable_iii.F[:,0])
+    dim_i = wind_eq.dimRxL(unstable_iii.w_str,unstable_iii.UST, z_list[i], unstable_iii.z_i)
     dim.append(dim_i)
-    m_z.append(m_z_i)
 
-dim = np.stack(dim)   
-m_z = np.stack(m_z)
+dim_stack = np.stack(dim)
 
+dim_stack[dim_stack < 0] = np.nan
 
-### Add to radix eq derived wsp to DataArray
-unstable_iii.update({'dim':(('time','z'), dim.T)})
-unstable_iii.update({'mz_unstable':(('time','z'), m_z.T)})
-
-max_f = np.nanmax(unstable_iii.mz_unstable[:,0])
-print(f"If NAN you are fucked --> {max_f}")
-
-### Drop any and all dim events less than zero or greater than 1
-unstable_iv = unstable_iii.where((unstable_iii.dim > 0), drop=False)
-#unstable_v = unstable_iv.where(unstable_iv.dim < 1, unstable_iv.mz_unstable, unstable_iv.F[:,0].all())
-
-unstable_v = unstable_iv
-#min_dim, max_dim, avg_dim = np.nanmin(unstable_iv.dim), np.nanmax(unstable_iv.dim), np.nanmean(unstable_iv.dim)
-min_dim, max_dim, avg_dim = np.nanmin(unstable_v.dim), np.nanmax(unstable_v.dim), np.nanmean(unstable_v.dim)
-print(f"Min Dim {min_dim} & Max Dim {max_dim} & Avg Dim {avg_dim}")
-
-max_f = np.nanmax(unstable_v.F[:,0])
-print(f"If NAN you are fucked --> {max_f}")
-#plt.plot(unstable_iv.mz_unstable)
-#### Remove any odd negative values...some occur and I dont know why 
-unstable = unstable_v.where((unstable_v.mz_unstable > 0), drop=False)
-
-###Check to see how many cases we have left
-sum_me = np.array(unstable.F[:,-4])
-unstable_non_nans = (~np.isnan(sum_me)).sum()
-print(f'We have {unstable_non_nans} number of times of a Unstable BL')
-
-max_f = np.nanmax(unstable.F[:,0])
-print(f"If NAN you are fucked --> {max_f}")
+dim_fl = dim_stack
+dim_fl[dim_fl > 1] = np.nan
 
 
-# %%
-#
-#dim = [] 
-#
-### I hate this loop its slow and stupid
-#for i in range(len(z_list)):
-#    dim_i = wind_eq.dimRxL(unstable_iii.w_str,unstable_iii.UST, z_list[i], unstable_iii.z_i)
-#    dim.append(dim_i)
-#
-#dim_stack = np.stack(dim)
-#
+wsp_z = np.array(unstable_iii.F)
+
+wsp_z[dim_fl.T > 1]
+
 ### Add dim to data array
-#unstable_iii.update({'dim':(('time','z'), dim_stack.T)})
-#
-##min_dim, max_dim, avg_dim = np.nanmin(unstable_iii.dim[:,2]), np.nanmax(unstable_iii.dim[:,2]), np.nanmean(unstable_iii.dim[:,2])
-#min_dim, max_dim, avg_dim = np.nanmin(unstable_iii.dim), np.nanmax(unstable_iii.dim), np.nanmean(unstable_iii.dim)
-#print(f"Min Dim {min_dim} & Max Dim {max_dim} & Avg Dim {avg_dim}")
-##unstable_iv = unstable_iii
-#### Drop any and all dim events less than zero or greater than 1
-#unstable_iv = unstable_iii.where((unstable_iii.dim > 0), drop=False)
-#unstable_v = unstable_iv.where(unstable_iv.dim > 1, unstable_iv.
+unstable_iii.update({'dim':(('time','z'), dim_fl.T)})
 
-#min_dim, max_dim, avg_dim = np.nanmin(unstable_iv.dim[:,-1]), np.nanmax(unstable_iv.dim), np.nanmean(unstable_iv.dim)
-#print(f"Min Dim {min_dim} & Max Dim {max_dim} & Avg Dim {avg_dim}")
+mz_unstable = wind_eq.RxL(unstable_iii.dim,unstable_iii.F[:,0])
 
-#unstable_v = unstable_iv.where((unstable_iv.F[:,0] > 2), drop=False)
-#
-###Check to see how many cases we have left
-#sum_me = np.array(unstable_v.F[:,-4])
-#unstable_non_nans = (~np.isnan(sum_me)).sum()
-#print(f'We have {unstable_non_nans} number of times of a Unstable BL')
-#
-#
-#
-### Solve for wsp using the radix wind eq!!!
-#mz_unstable = wind_eq.RxL(unstable_v.dim,unstable_v.F[:,0])
-#
-#### Add to radix eq derived wsp to DataArray
-#unstable_v.update({'mz_unstable':(('time','z'), mz_unstable)})
-#
-#print(np.nanmax(unstable_v.F[:,0]))
-#print(np.nanmax(unstable_v.z[-4]))
-#
-#
-##plt.plot(unstable_iv.mz_unstable)
-##### Remove any odd negative values...some occur and I dont know why 
-#unstable = unstable_v.where((unstable_v.mz_unstable > 0), drop=False)
-#
-####Check to see how many cases we have left
-#sum_me = np.array(unstable.F[:,-4])
-#unstable_non_nans = (~np.isnan(sum_me)).sum()
-#print(f'We have {unstable_non_nans} number of times of a Unstable BL')
+a = mz_unstable[:,4:]  
+b = (wsp_z[:,0:4])
+please = np.concatenate((b, a), axis=1)
+
+
+unstable_iii.update({'mz_unstable':(('time','z'), please)})
+unstable = unstable_iii
+
 
 
 # %% [markdown]
 #
-# # Apply conditional statements to var_ds to find  natural surface layer. 
+# # Plot the mean wind speed at height for all unstable conditions using Radix Wind Equation compared to tower observations
 
-
-# %%
-## Drop any and all rain events
-min_dim, max_dim, max_dim_ave = round(np.nanmin(unstable.dim),3), round(np.nanmax(unstable.dim),3), round(np.nanmean(unstable.dim),3)
-print(f"Min Dim {min_dim} & Max Dim {max_dim} & Avg Dim {max_dim_ave}")
-
-min_mz_unstable, max_mz_unstable = round(np.nanmin(unstable.mz_unstable),3), round(np.nanmax(unstable.mz_unstable),3)
-print(f"Min mz {min_mz_unstable} cm & Max mz {max_mz_unstable}")
 
 # %%
 
@@ -507,7 +456,8 @@ fig, ax = plt.subplots(1,1, figsize=(12,10))
 fig.suptitle('Wind Profile in Unstable Radix Layer', fontsize= plt_set.title_size, fontweight="bold")
 
 
-ax.scatter(unstable.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
+#ax.scatter(unstable.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
+ax.plot(unstable.F.mean(dim='time'),z_list, color = 'red', linestyle = '--', label = 'in-situ')
 ax.plot(unstable.mz_unstable.mean(dim='time'),z_list, color = 'k', label = 'model')
 
 ax.set_xlabel("Wind Speed $(ms^-1)$", fontsize= plt_set.label)
@@ -522,11 +472,16 @@ ax.legend(loc='best')
 fig.savefig(save + 'Unstable_Wind_Profile')
 
 
+
+# %% [markdown]
+#
+# # Compare the Radix Layer Wind Equation to Obervational Tower Data in Unstable  condtions
+
 # %%
 ## Hexbin plot or 2D histogram
 
-sns.set(rc={'figure.figsize':(11.7,8.27)})
-j = sns.jointplot(x= unstable.F, y= unstable.mz_unstable, kind='hex', bins=10)
+#sns.set(rc={'figure.figsize':(11.7,8.27)})
+j = sns.jointplot(x= unstable.F, y= unstable.mz_unstable, kind='hex', bins=15)
 j.annotate(stats.pearsonr)
 j.fig.set_size_inches(8,8)
 plt.subplots_adjust(top=0.9)
@@ -535,56 +490,103 @@ j.savefig(save + "Stats_Unstable.png")
 
 
 
-# %%
-#
-##def wind_func(z, a0, a1, a2, a3):
-##    'nonlinear function in a and to fit to data'
-##    fit = a0 + a1*z + a2*z**2. + a3*np.log(z)
-##    return fit
-#
-#unstable_F = unstable.where(unstable.F[:,-4] == np.nan, drop=False)
-#
-#def RxL(dim,m_bl, A, D):  
-#    '''
-#    This Function is used for the wind profile in the Radix Layer
-#
-#    '''   
-#    m_z = m_bl * ((dim**D)**A) * np.exp(A*(1-dim**D))
-#    m_z = np.array(m_z)
-#    return m_z
-#
-#    
-#def rmnan(var):
-#    a = np.array(var)
-#    a = a[~np.isnan(a)]
-#    a[a < 1E308]
-#    return a
-#
-#wsp     = rmnan(unstable.F.mean(dim='time'))
-#wsp_200 = rmnan(unstable.F[:,0])
-#u_str   = rmnan(unstable.UST)
-#w_str   = rmnan(unstable.w_str)
-#dim_z   = rmnan(unstable.dim)
-#
-#mx_hiehgt = rmnan(unstable_iii.z_i)
-#
-#
-#zz = unstable_iii.z[0:6]
-#
-##### Do the curve fit 
-#popt, pcov = curve_fit(RxL,zz,wsp)
-#print(popt.shape)
-#
-##### Create a z axis of the same shape as function and run funtion 
-##z_int = np.arange(1,201,0.5)
-#fit_f = RxL(dim_z, wsp_200, *popt)
-#
-## %%
-#
-#fig, ax = plt.subplots(1,1, figsize=(12,10))
-#fig.suptitle('Wind Profile in Unstable Radix Layer', fontsize= plt_set.title_size, fontweight="bold")
-#ax.plot(fit_f,z_list, color ='k', linewidth = 2)
 
+# %% [markdown]
+#
+# # With the Radix Equation Failing misserably we will instead solve a nonlinear function in variable (a) and to fit the observed tower data
+
+
+# %%
+
+def wind_func(z, a0, a1, a2, a3):
+    'nonlinear function in a and to fit to data'
+    fit = a0 + a1*z + a2*z**2. + a3*np.log(z)
+    return fit
+
+rev_z = z_list[::-1]
+rev_z = rev_z[1:]
+
+## Make and Array for wind speed form the tower
+wsp = np.array(unstable.F)
+
+#print(rev_monthly_wind_avg.shape)
+wsp = wsp[:,:-1]
+
+#a = rev_monthly_wind_avg
+mask = np.any(np.isnan(wsp), axis=1)
+
+wsp_for_fit = wsp[~mask]
+
+z_int = np.arange(1,201,0.5)
+
+mz_fit_i = []
+
+for i in range(len(wsp_for_fit[:,0])):
+    popt, pcov = curve_fit(wind_func,z_list[:-1],wsp_for_fit[i,:]) 
+    #### Create a z axis of the same shape as function and run funtion 
+    fit_f = wind_func(z_list,*popt)
+    mz_fit_i.append(fit_f)
+
+mz_fit = np.stack(mz_fit_i)
+
+# %% [markdown]
+#
+# # Plot the mean wind speed at height for all unstable conditions using WInd Fit Equation compared to tower observations
+
+
+# %%
+###############################################################################################
+"""####################### Plot Unstable Conditions mean and do Stats  #########################"""
+###############################################################################################
+fig, ax = plt.subplots(1,1, figsize=(12,10))
+fig.suptitle('Wind Profile in Unstable Radix Layer', fontsize= plt_set.title_size, fontweight="bold")
+
+
+#ax.scatter(unstable.F.mean(dim='time'),z_list, color = 'red', marker='+', label = 'in-situ')
+ax.plot(unstable.F.mean(dim='time'),z_list, color = 'red', linestyle = '--', label = 'in-situ')
+ax.plot(mz_fit.mean(axis = 0),z_list, color = 'k', label = 'model')
+
+ax.set_xlabel("Wind Speed $(ms^-1)$", fontsize= plt_set.label)
+ax.set_ylabel("Height Above Ground Level  \n (AGL)", fontsize= plt_set.label)
+ax.tick_params(axis='both', which='major', labelsize= plt_set.tick_size)
+ax.xaxis.grid(color='gray', linestyle='dashed')
+ax.yaxis.grid(color='gray', linestyle='dashed')
+ax.set_facecolor('lightgrey')
+ax.legend(loc='best')
+
+
+fig.savefig(save + 'Unstable_Wind_Profile_Fitted')
+
+# %% [markdown]
+
+# # Compare the Wind Fit Function to Obervational Tower Data in Unstable condtions.....of no suprise its perfect :) 
+
+# %%
+## Hexbin plot or 2D histogram
+
+sns.set(rc={'figure.figsize':(11.7,8.27)})
+j = sns.jointplot(x=wsp_for_fit , y= mz_fit[:,:-1] , kind='hex', bins=15)
+j.annotate(stats.pearsonr)
+j.fig.set_size_inches(8,8)
+plt.subplots_adjust(top=0.9)
+j.fig.suptitle('Unstable Conditions \n  Wind Fit Function (model) to Observation (in-situ)')
+j.savefig(save + "Stats_Unstable_Fitted.png")
+
+
+
+# %% [markdown]
+
+# # Make an Xarray of the new fitted fuction ...this could be better
+
+# %% 
+
+
+dims_fit = ('time', 'z')
+fit_dict1 = {'wsp_fit' : (dims_fit,np.array(wsp_for_fit))}
+fit_dict2 = {'mz_fit' : (dims_fit,np.array(mz_fit[:,:-1]))}
+
+fit_list = [fit_dict1, fit_dict2]
+fit_ds = read_cabauw.xarray_like(fit_list)
 
 
 # %% [markdown]
@@ -599,8 +601,9 @@ j.savefig(save + "Stats_Unstable.png")
 import pandas as pd
 
 seasons_stable = stable.groupby('time.season').mean('time')
-seasons_unstable = unstable.groupby('time.season').mean('time')
 seasons_nutral = nutral.groupby('time.season').mean('time')
+seasons_unstable = unstable.groupby('time.season').mean('time')
+#seasons_fitted = fit_ds.groupby('time.season').mean('time')
 
 
 # Quick plot to show the results
@@ -610,26 +613,34 @@ color_season = ['blue', 'green', 'red', 'orange']
 fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(12,10))
 for i, season in enumerate(('DJF', 'MAM', 'JJA', 'SON')):
     seasons_stable['F'].sel(season=season).where(notnull).plot(
-        ax=axes[i, 0], y= 'z', color = color_season[i])
+        ax=axes[i, 0], y= 'z', color = color_season[i], linestyle='--')
     
     seasons_stable['mz_stable'].sel(season=season).where(notnull).plot(
-        ax=axes[i, 0], y= 'z', color = color_season[i], linestyle='dashed')
-
-    seasons_unstable['F'].sel(season=season).where(notnull).plot(
-        ax=axes[i, 1], y= 'z', color = color_season[i])
+        ax=axes[i, 0], y= 'z', color = color_season[i])
     
-    seasons_unstable['mz_unstable'].sel(season=season).where(notnull).plot(
-        ax=axes[i, 1], y= 'z', color = color_season[i], linestyle='dashed')
-
     seasons_nutral['F'].sel(season=season).where(notnull).plot(
-        ax=axes[i, 2], y= 'z', color = color_season[i])
+        ax=axes[i, 1], y= 'z', color = color_season[i], linestyle='--')
     
     seasons_nutral['mz_neutral'].sel(season=season).where(notnull).plot(
-        ax=axes[i, 2], y= 'z', color = color_season[i], linestyle='dashed')
+        ax=axes[i, 1], y= 'z', color = color_season[i])
+
+    seasons_unstable['F'].sel(season=season).where(notnull).plot(
+        ax=axes[i, 2], y= 'z', color = color_season[i], linestyle='--')
+    
+    seasons_unstable['mz_unstable'].sel(season=season).where(notnull).plot(
+        ax=axes[i, 2], y= 'z', color = color_season[i])
+
+#    seasons_fitted['wsp_fit'].sel(season=season).where(notnull).plot(
+#        ax=axes[i, 3], y= 'z', color = color_season[i], linestyle='--')
+#    
+#    seasons_fitted['mz_fit'].sel(season=season).where(notnull).plot(
+#        ax=axes[i, 3], y= 'z', color = color_season[i])
 
     axes[i, 0].set_ylabel(season)
     axes[i, 1].set_ylabel('')
     axes[i, 2].set_ylabel('')
+#    axes[i, 3].set_ylabel('')
+
 
 
 
@@ -644,8 +655,9 @@ for ax in axes.flat:
     ax.axes.set_title('')
 
 axes[0, 0].set_title('Stable')
-axes[0, 1].set_title('Unstable')
-axes[0, 2].set_title('Neutral')
+axes[0, 1].set_title('Neutral')
+axes[0, 2].set_title('Unstable')
+#axes[0, 3].set_title('Unstable Fitted')
 
 plt.tight_layout()
 
