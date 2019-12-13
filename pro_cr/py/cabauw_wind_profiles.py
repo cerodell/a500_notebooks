@@ -290,6 +290,10 @@ j.fig.suptitle('Stable Conditions \n  Log Linear Wind Eq (model) to Observation 
 j.savefig(save + "Stats_Stable.png")
 
 
+## Solve for the root mean square error
+rmse = wind_eq.rmse(stable.mz_stable , stable.F)
+print(f"The root mean square error for Stable Surface Layer is {rmse}")
+
 # %% [markdown]
 #
 # # Solve for wind speed at height in nutral conditions using Log  Wind Equation
@@ -365,6 +369,10 @@ j.fig.suptitle('Neutral Conditions \n Log Wind Eq (model) to Observation (in-sit
 j.savefig(save + "Stats_Nutrual.png")
 
 
+## Solve for the root mean square error
+rmse = wind_eq.rmse(nutral.mz_neutral , nutral.F)
+print(f"The root mean square error for Neutral Surface Layer is {rmse}")
+
 # %% [markdown]
 #
 # # Apply conditional statements to var_ds to find a time of stable unstable surface layer. 
@@ -390,7 +398,7 @@ j.savefig(save + "Stats_Nutrual.png")
 ## Data range was taken from stulls Minessota field campaign
 lengeth = len(np.array(unstable_ii.P0))
 w_str = np.random.uniform(low=1., high=3.5, size=(lengeth,))
-z_i = np.random.uniform(low=140., high=150, size=(lengeth,))
+z_i = np.random.uniform(low=1000., high=1500, size=(lengeth,))
 unstable_ii.update({'w_str':(('time'), w_str)})
 unstable_ii.update({'z_i':(('time'), z_i)})
 
@@ -434,10 +442,10 @@ mz_unstable = wind_eq.RxL(unstable_iii.dim,unstable_iii.F[:,0])
 
 a = mz_unstable[:,4:]  
 b = (wsp_z[:,0:4])
-please = np.concatenate((b, a), axis=1)
+please_work = np.concatenate((b, a), axis=1)
 
 
-unstable_iii.update({'mz_unstable':(('time','z'), please)})
+unstable_iii.update({'mz_unstable':(('time','z'), mz_unstable)})
 unstable = unstable_iii
 
 
@@ -491,12 +499,18 @@ j.savefig(save + "Stats_Unstable.png")
 
 
 
+## Solve for the root mean square error
+rmse = wind_eq.rmse(unstable.mz_unstable , unstable.F)
+print(f"The root mean square error for unstable Radix Layer is {rmse}")
+
+
 # %% [markdown]
 #
 # # With the Radix Equation Failing misserably we will instead solve a nonlinear function in variable (a) and to fit the observed tower data
 
 
 # %%
+
 
 def wind_func(z, a0, a1, a2, a3):
     'nonlinear function in a and to fit to data'
@@ -508,25 +522,30 @@ rev_z = rev_z[1:]
 
 ## Make and Array for wind speed form the tower
 wsp = np.array(unstable.F)
-
-#print(rev_monthly_wind_avg.shape)
+## Flip Array by its z dimiention
 wsp = wsp[:,:-1]
 
-#a = rev_monthly_wind_avg
+## Create a mask of for any location of nan valuse
 mask = np.any(np.isnan(wsp), axis=1)
 
+## apply mask to remove nan values
 wsp_for_fit = wsp[~mask]
 
-z_int = np.arange(1,201,0.5)
-
+## Initialize a list of wind speed as caluclated by the fit function
 mz_fit_i = []
 
+poptf, pcovf = [], []
+## Loop and caluclate the fit function for every time
 for i in range(len(wsp_for_fit[:,0])):
     popt, pcov = curve_fit(wind_func,z_list[:-1],wsp_for_fit[i,:]) 
     #### Create a z axis of the same shape as function and run funtion 
+    poptf.append(popt)
+    pcovf.append(pcov)
+    
     fit_f = wind_func(z_list,*popt)
     mz_fit_i.append(fit_f)
-
+    
+## stack that shit 
 mz_fit = np.stack(mz_fit_i)
 
 # %% [markdown]
@@ -573,6 +592,9 @@ j.fig.suptitle('Unstable Conditions \n  Wind Fit Function (model) to Observation
 j.savefig(save + "Stats_Unstable_Fitted.png")
 
 
+## Solve for the root mean square error
+rmse = wind_eq.rmse(mz_fit[:,:-1],wsp_for_fit)
+print(f"The root mean square error for unstable fit is {rmse}")
 
 # %% [markdown]
 
@@ -580,12 +602,15 @@ j.savefig(save + "Stats_Unstable_Fitted.png")
 
 # %% 
 
-
+## declair you dimentions for fitted xr and make dict for each variable you will add
 dims_fit = ('time', 'z')
 fit_dict1 = {'wsp_fit' : (dims_fit,np.array(wsp_for_fit))}
 fit_dict2 = {'mz_fit' : (dims_fit,np.array(mz_fit[:,:-1]))}
 
+## place them in a list
 fit_list = [fit_dict1, fit_dict2]
+
+## make the xr
 fit_ds = read_cabauw.xarray_like(fit_list)
 
 
@@ -630,6 +655,8 @@ for i, season in enumerate(('DJF', 'MAM', 'JJA', 'SON')):
     seasons_unstable['mz_unstable'].sel(season=season).where(notnull).plot(
         ax=axes[i, 2], y= 'z', color = color_season[i])
 
+
+## Thought i could ge the the fitted function to work in here but had issue with the time....like i ran out of time haha 
 #    seasons_fitted['wsp_fit'].sel(season=season).where(notnull).plot(
 #        ax=axes[i, 3], y= 'z', color = color_season[i], linestyle='--')
 #    
@@ -661,7 +688,7 @@ axes[0, 2].set_title('Unstable')
 
 plt.tight_layout()
 
-#fig.suptitle('Seasonal Wind Speed Profiles', fontsize=16, y=1.02)
+fig.savefig(save + 'Seasonal_Mean_Wind_Profiles')
 
 # %% [markdown]
 #
@@ -669,95 +696,43 @@ plt.tight_layout()
 
 # #### This shows the distribution of wind speed profiles of the observations versus the wind profile equations 
 
+# #### I feel I am close to getting this but again time time time isnt on my side.. sorry mic
+
 
 # %%
 
 #
-#import pandas as pd
-#
-seasons_stable_all = stable.groupby('time.season')
-#seasons_unstable = unstable.groupby('time.season').mean('time')
-#seasons_nutral = nutral.groupby('time.season').mean('time')
-#
-#
-## Quick plot to show the results
-#notnull = pd.notnull(seasons_stable.F[0])
-#
-#color_season = ['blue', 'green', 'red', 'orange']
-#fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(12,10))
-#for i, season in enumerate(('DJF', 'MAM', 'JJA', 'SON')):
-#    seasons_stable['F'].sel(season=season).where(notnull).plot(
-#        ax=axes[i, 0], y= 'z', color = color_season[i])
-#    
-#    seasons_stable['mz_stable'].sel(season=season).where(notnull).plot(
-#        ax=axes[i, 0], y= 'z', color = color_season[i], linestyle='dashed')
-#
-#    seasons_unstable['F'].sel(season=season).where(notnull).plot(
-#        ax=axes[i, 1], y= 'z', color = color_season[i])
-#    
-#    seasons_unstable['mz_unstable'].sel(season=season).where(notnull).plot(
-#        ax=axes[i, 1], y= 'z', color = color_season[i], linestyle='dashed')
-#
-#    seasons_nutral['F'].sel(season=season).where(notnull).plot(
-#        ax=axes[i, 2], y= 'z', color = color_season[i])
-#    
-#    seasons_nutral['mz_neutral'].sel(season=season).where(notnull).plot(
-#        ax=axes[i, 2], y= 'z', color = color_season[i], linestyle='dashed')
-#
-#    axes[i, 0].set_ylabel(season)
-#    axes[i, 1].set_ylabel('')
-#    axes[i, 2].set_ylabel('')
-#
-#
-#
-#
-#
-#for ax in axes.flat:
-#    ax.axes.get_xaxis().set_ticklabels([])
-#    ax.axes.get_yaxis().set_ticklabels([])
-#    ax.axes.axis('tight')
-#    ax.axes.set_xlim(2,12)
-#    ax.axes.set_xlabel('')
-#    ax.axes.set_title('')
-#
-#axes[0, 0].set_title('Stable')
-#axes[0, 1].set_title('Unstable')
-#axes[0, 2].set_title('Neutral')
-#
-#plt.tight_layout()
-#
-
-#
-#
 #sns.set(style="dark")
 #import pandas as pd
-#
-#seasons_stable_all = stable.groupby('time.season')
-##seasons_unstable = unstable.groupby('time.season').mean('time')
-##seasons_nutral = nutral.groupby('time.season').mean('time')
-#
-#
-## Quick plot to show the results
-#notnull = pd.notnull(seasons_stable_all.F[0])
-#
+
+seasons_stable_all = list(stable.groupby('time.season'))
+seasons_unstable_all = list(unstable.groupby('time.season'))
+seasons_nutral_all = list(nutral.groupby('time.season'))
+
+
+#tester = np.array(seasons_stable_all[0][1].mz_stable)
+
+# %%
+
 #color_season = ['blue', 'green', 'red', 'orange']
-#fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(12,10))
-#for i, season in enumerate(('DJF', 'MAM', 'JJA', 'SON')):
-#
-#    # Create a cubehelix colormap to use with kdeplot
-#    cmap = 'Reds'
-#
-#    sns.kdeplot(seasons_stable_all['F'].sel(season=season).where(notnull), 
-#                seasons_stable_all['mz_stable'].sel(season=season).where(notnull), 
-#                cmap=cmap, shade=True, cut=5, ax=axes[i, 0])
+fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(12,10))
+seasons_list = ['DJF', 'JJA', 'MAM', 'SON']
+
+for i in range(len(seasons_list)):
+    print(i)
+#     Create a cubehelix colormap to use with kdeplot
+    cmap = 'Reds'
+##
+    axes[i,0].scatter(np.array(seasons_stable_all[i][1].F) ,  np.array(seasons_stable_all[i][1].mz_stable), alpha=0.3)
+#    
+    axes[i,1].scatter(seasons_nutral_all[i][1].F,  seasons_nutral_all[i][1].mz_neutral , alpha=0.3)
+    
+    axes[i,2].scatter(seasons_unstable_all[i][1].F,  seasons_unstable_all[i][1].mz_unstable ,alpha=0.3)
+
 #
 #    axes[i, 0].set_ylabel(season)
 #    axes[i, 1].set_ylabel('')
 #    axes[i, 2].set_ylabel('')
-#
-#
-#
-#
 #
 #for ax in axes.flat:
 #    ax.axes.get_xaxis().set_ticklabels([])

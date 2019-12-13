@@ -84,6 +84,20 @@ def loglin_stable(u_str,z,L):
 def obukhov_len(u_str,temp,wtheta_peturb):
     L = (- u_str ** 3) / (constants.k * (constants.g / temp) * wtheta_peturb)
     return(L)
+    
+    
+def rmse(predictions, targets):    
+    rmse= np.sqrt(np.nanmean(((np.array(predictions) - np.array(targets)) ** 2))) 
+    rmse = round(rmse,4)
+    return rmse
+
+
+#def mask(var1,var2):
+#    mask = np.any(np.isnan(var1), axis=1) 
+#    var1 = var1[~mask]
+#    
+#    mask = np.any(np.isnan(var1), axis=1) 
+#    var1 = var1[~mask]
 
 
 
