@@ -175,7 +175,7 @@ def read(files):
     return(var_list, met_list, tower_list, surf_list, fill_var)
 
 
-def xarray_unlike(dict_list): 
+def xarray_combine_nested(dict_list): 
     xarray_files = []
     for index in dict_list:
         ds  = xr.Dataset(index)
@@ -184,7 +184,7 @@ def xarray_unlike(dict_list):
     return(ds_final)
 
     
-def xarray_like(dict_list):
+def xarray_merge(dict_list):
     xarray_files = []
     for index in dict_list:
         ds  = xr.Dataset(index)

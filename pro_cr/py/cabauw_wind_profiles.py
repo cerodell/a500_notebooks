@@ -584,7 +584,7 @@ fig.savefig(save + 'Unstable_Wind_Profile_Fitted')
 ## Hexbin plot or 2D histogram
 
 sns.set(rc={'figure.figsize':(11.7,8.27)})
-j = sns.jointplot(x=wsp_for_fit , y= mz_fit[:,:-1] , kind='hex', bins=15)
+j = sns.jointplot(x=wsp_for_fit , y= mz_fit[:,:-1] , kind='hex', bins=15, ylim = (0,25), xlim =(0,25))
 j.annotate(stats.pearsonr)
 j.fig.set_size_inches(8,8)
 plt.subplots_adjust(top=0.9)
@@ -611,7 +611,7 @@ fit_dict2 = {'mz_fit' : (dims_fit,np.array(mz_fit[:,:-1]))}
 fit_list = [fit_dict1, fit_dict2]
 
 ## make the xr
-fit_ds = read_cabauw.xarray_like(fit_list)
+fit_ds = read_cabauw.xarray_merge(fit_list)
 
 
 # %% [markdown]
@@ -634,9 +634,9 @@ seasons_unstable = unstable.groupby('time.season').mean('time')
 # Quick plot to show the results
 notnull = pd.notnull(seasons_stable.F[0])
 
-color_season = ['blue', 'green', 'red', 'orange']
+color_season = ['darkblue', 'darkgreen', 'darkred', 'darkorange']
 fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(12,10))
-for i, season in enumerate(('DJF', 'MAM', 'JJA', 'SON')):
+for i, season in enumerate(('DJF','MAM','JJA', 'SON')):
     seasons_stable['F'].sel(season=season).where(notnull).plot(
         ax=axes[i, 0], y= 'z', color = color_season[i], linestyle='--')
     
@@ -668,11 +668,6 @@ for i, season in enumerate(('DJF', 'MAM', 'JJA', 'SON')):
     axes[i, 2].set_ylabel('')
 #    axes[i, 3].set_ylabel('')
 
-
-
-
-
-
 for ax in axes.flat:
     ax.axes.get_xaxis().set_ticklabels([])
     ax.axes.get_yaxis().set_ticklabels([])
@@ -694,57 +689,225 @@ fig.savefig(save + 'Seasonal_Mean_Wind_Profiles')
 #
 # # Look a the seasonality difference of the varied wind profile equations
 
-# #### This shows the distribution of wind speed profiles of the observations versus the wind profile equations 
-
-# #### I feel I am close to getting this but again time time time isnt on my side.. sorry mic
-
+# ##### First need to group seasons into list and reorganize the list of seasons to be in a logical order  
 
 # %%
 
-#
-#sns.set(style="dark")
-#import pandas as pd
-
+## Group indiviual Stability condtions by season
 seasons_stable_all = list(stable.groupby('time.season'))
 seasons_unstable_all = list(unstable.groupby('time.season'))
 seasons_nutral_all = list(nutral.groupby('time.season'))
 
 
-#tester = np.array(seasons_stable_all[0][1].mz_stable)
+def lisub(ds_list):
+    """
+    This function reorganize the list of seasons to be in a logical order
+    """
+    a = ds_list[0]
+    b = ds_list[1]
+    c = ds_list[2]
+    d = ds_list[3]
+    new_list = [a,c,b,d]
+    return new_list
+
+## New list of season in logical order 
+seasons_stable_all = lisub(seasons_stable_all)  
+seasons_unstable_all = lisub(seasons_unstable_all)  
+seasons_nutral_all = lisub(seasons_nutral_all)  
+
+# %% [markdown]
+#
+
+# ## This shows the distribution of wind speed profiles of the observations versus the wind profile equations 
+
+
+# %%
+fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(12,10))
+
+
+color_season = ['darkblue', 'darkgreen', 'darkred', 'darkorange']
+for i, season in enumerate(('DJF','MAM','JJA', 'SON')):
+    
+    axes[i,0].scatter(seasons_stable_all[i][1].F , seasons_stable_all[i][1].mz_stable, alpha=0.05, color = color_season[i])
+    axes[i,1].scatter(seasons_nutral_all[i][1].F,  seasons_nutral_all[i][1].mz_neutral , alpha=0.05, color = color_season[i]) 
+    axes[i,2].scatter(seasons_unstable_all[i][1].F,  seasons_unstable_all[i][1].mz_unstable ,alpha=0.05, color = color_season[i])
+    
+    axes[i, 0].set_ylabel(season)
+    axes[i, 1].set_ylabel('')
+    axes[i, 2].set_ylabel('')
+
+for ax in axes.flat:
+    ax.axes.get_xaxis().set_ticklabels([])
+    ax.axes.get_yaxis().set_ticklabels([])
+    ax.axes.axis('tight')
+    ax.axes.set_xlim(0,25)
+    ax.axes.set_ylim(0,25)
+    ax.axes.set_xlabel('')
+    ax.axes.set_title('')
+
+axes[0, 0].set_title('Stable')
+axes[0, 1].set_title('Neutral')
+axes[0, 2].set_title('Unstable')
+
+
+plt.tight_layout()
+
+fig.savefig(save + 'Seasonal_Distribution_Wind_Profiles')
+
+
+
+# %% [markdown]
+
+
+# ## Calculate the Pearson correlation coefficient and the root mean square error based on the seasonality of each stability equation
 
 # %%
 
-#color_season = ['blue', 'green', 'red', 'orange']
-fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(12,10))
-seasons_list = ['DJF', 'JJA', 'MAM', 'SON']
-
-for i in range(len(seasons_list)):
-    print(i)
-#     Create a cubehelix colormap to use with kdeplot
-    cmap = 'Reds'
-##
-    axes[i,0].scatter(np.array(seasons_stable_all[i][1].F) ,  np.array(seasons_stable_all[i][1].mz_stable), alpha=0.3)
-#    
-    axes[i,1].scatter(seasons_nutral_all[i][1].F,  seasons_nutral_all[i][1].mz_neutral , alpha=0.3)
+def rmnan_flat(var_i, var2_i):
+    """
+    This Fuction Removes nan values from a 2D array and flattens it... This allows you to claucate a perasorr values
+    Not sure if ithis is the best way to do this but it works..or so i think lol 
+    """
+#    var_i = np.array(var_i)
     
-    axes[i,2].scatter(seasons_unstable_all[i][1].F,  seasons_unstable_all[i][1].mz_unstable ,alpha=0.3)
+    var =  np.array(var_i).flatten()
+    var2 = np.array(var2_i).flatten()
+    
+    
+    mask = np.isnan(var)
+    var = var[~mask]
+    var2 = var2[~mask]
+    
+    
+    mask = np.isnan(var2)
+    var = var[~mask]
+    var2 = var2[~mask]
+    
+    
+    pr = stats.pearsonr(var, var2)
+    pr = round(pr[0],4)
+    
+    return pr
 
+
+# %% [markdown]
+
+
+# #### Print RMSE and PCC 
+
+# %%
+print("############################# Stable ##############################")
+print("######## RMSE ##############")
+
+for i, season in enumerate(('DJF','MAM','JJA', 'SON')):
+    rmse = wind_eq.rmse(seasons_stable_all[i][1].mz_stable, seasons_stable_all[i][1].F)
+    print(f"The Seasonal root mean square error for Stable is {rmse} during {season}")
+
+print("####### PearsonR ###########")
+
+for i, season in enumerate(('DJF','MAM','JJA', 'SON')): 
+    pr = rmnan_flat(seasons_stable_all[i][1].mz_stable, seasons_stable_all[i][1].F)
+    print(f"The Seasonal PearsonR Vaukle for Stable constion is {pr} during {season}")
+
+
+
+
+print("############################# Neutral #################################")
+print("######## RMSE ##############")
+
+for i, season in enumerate(('DJF','MAM','JJA', 'SON')):
+    rmse = wind_eq.rmse(seasons_nutral_all[i][1].mz_neutral, seasons_nutral_all[i][1].F)
+    print(f"The Seasonal root mean square error for Neutral is {rmse} during {season}")
+
+print("####### PearsonR ###########")
+
+for i, season in enumerate(('DJF','MAM','JJA', 'SON')): 
+    pr = rmnan_flat(seasons_nutral_all[i][1].mz_neutral, seasons_nutral_all[i][1].F)
+    print(f"The Seasonal PearsonR Vaukle for Neutral constion is {pr} during {season}")
+     
+    
+    
+
+print("############################ Unstable #################################")
+print("######## RMSE ##############")
+
+for i, season in enumerate(('DJF','MAM','JJA', 'SON')):
+    rmse = wind_eq.rmse(seasons_unstable_all[i][1].mz_unstable, seasons_unstable_all[i][1].F)
+    print(f"The Seasonal root mean square error for Unstable is {rmse} during {season}")
+ 
+print("####### PearsonR ###########")
+   
+for i, season in enumerate(('DJF','MAM','JJA', 'SON')): 
+    pr = rmnan_flat(seasons_unstable_all[i][1].mz_unstable, seasons_unstable_all[i][1].F)
+    print(f"The Seasonal PearsonR Vaukle for Unstable constion is {pr} during {season}")
+
+
+
+# %% [markdown]
+
+
+# ### Failed attmpete at making the distribution plots from seaborn...could get (and make it much cleaner) with more time....life 
+
+# %%
+#import matplotlib.pyplot as plt
+#import matplotlib.gridspec as gridspec
+#import seaborn as sns; sns.set()
+##import SeabornFig2Grid as sfg
 #
-#    axes[i, 0].set_ylabel(season)
-#    axes[i, 1].set_ylabel('')
-#    axes[i, 2].set_ylabel('')
 #
-#for ax in axes.flat:
-#    ax.axes.get_xaxis().set_ticklabels([])
-#    ax.axes.get_yaxis().set_ticklabels([])
-#    ax.axes.axis('tight')
-#    ax.axes.set_xlim(2,12)
-#    ax.axes.set_xlabel('')
-#    ax.axes.set_title('')
 #
-#axes[0, 0].set_title('Stable')
-#axes[0, 1].set_title('Unstable')
-#axes[0, 2].set_title('Neutral')
+## An lmplot
+#g0 = sns.jointplot(seasons_stable_all[0][1].F , seasons_stable_all[0][1].mz_stable,kind='hex', bins=15 )
+#g1 = sns.jointplot(seasons_stable_all[1][1].F , seasons_stable_all[1][1].mz_stable,kind='hex', bins=15 )
+#g2 = sns.jointplot(seasons_stable_all[2][1].F , seasons_stable_all[2][1].mz_stable,kind='hex', bins=15 )
+#g3 = sns.jointplot(seasons_stable_all[3][1].F , seasons_stable_all[3][1].mz_stable,kind='hex', bins=15 )
 #
-##plt.tight_layout()
-#f.tight_layout()
+#
+#g4 = sns.jointplot(seasons_stable_all[0][1].F , seasons_stable_all[0][1].mz_stable,kind='hex', bins=15 )
+#g5 = sns.jointplot(seasons_stable_all[1][1].F , seasons_stable_all[1][1].mz_stable,kind='hex', bins=15 )
+#g6 = sns.jointplot(seasons_stable_all[2][1].F , seasons_stable_all[2][1].mz_stable,kind='hex', bins=15 )
+#g7 = sns.jointplot(seasons_stable_all[3][1].F , seasons_stable_all[3][1].mz_stable,kind='hex', bins=15 )
+#
+#
+#g8  = sns.jointplot(seasons_stable_all[0][1].F , seasons_stable_all[0][1].mz_stable,kind='hex', bins=15 )
+#g9  = sns.jointplot(seasons_stable_all[1][1].F , seasons_stable_all[1][1].mz_stable,kind='hex', bins=15 )
+#g10 = sns.jointplot(seasons_stable_all[2][1].F , seasons_stable_all[2][1].mz_stable,kind='hex', bins=15 )
+#g11 = sns.jointplot(seasons_stable_all[3][1].F , seasons_stable_all[3][1].mz_stable,kind='hex', bins=15 )
+#
+#
+#fig2 = plt.figure(figsize=(13,8))
+#gs = gridspec.GridSpec(ncols=2, nrows=2, figure=fig2)
+#
+##mg0 = sfg.SeabornFig2Grid(g0, fig, gs[0,0])
+##mg1 = sfg.SeabornFig2Grid(g1, fig, gs[1,0])
+##mg2 = sfg.SeabornFig2Grid(g2, fig, gs[2,0])
+##mg3 = sfg.SeabornFig2Grid(g3, fig, gs[3,0])
+##
+##mg4 = sfg.SeabornFig2Grid(g4, fig, gs[1,0])
+##mg5 = sfg.SeabornFig2Grid(g5, fig, gs[1,1])
+##mg6 = sfg.SeabornFig2Grid(g6, fig, gs[1,2])
+##mg7 = sfg.SeabornFig2Grid(g7, fig, gs[1,3])
+##
+##mg8  = sfg.SeabornFig2Grid(g8,  fig, gs[2,0])
+##mg9  = sfg.SeabornFig2Grid(g9,  fig, gs[2,1])
+##mg10 = sfg.SeabornFig2Grid(g10, fig, gs[2,2])
+##mg11 = sfg.SeabornFig2Grid(g11, fig, gs[2,3])
+#
+#f2_ax1 = g0.add_subplot(gs[0, 0])
+#f2_ax2 = g1.add_subplot(gs[0, 1])
+#f2_ax3 = g2.add_subplot(gs[1, 0])
+#f2_ax4 = g3.add_subplot(gs[1, 1])
+#
+#
+#
+#gs.tight_layout(fig)
+##gs.update(top=0.7)
+#
+#plt.show()
+#
+#
+#
+##j = sns.jointplot(seasons_stable_all[0][1].F , seasons_stable_all[0][1].mz_stable,kind='hex', bins=15 )
+##j.annotate(stats.pearsonr)
+##j.ax_marg_x.set_axis_off()
+##j.ax_marg_y.set_axis_off()

@@ -45,9 +45,9 @@ var_list, met_list, tower_list, surf_list, fill_var = read_cabauw.read(files)
 
 
 ## Combine Nested  DataArrays from Lists of Dictionaries
-met_ds = read_cabauw.xarray_unlike(met_list)
-tower_ds = read_cabauw.xarray_unlike(tower_list)
-surf_ds = read_cabauw.xarray_unlike(surf_list)
+met_ds = read_cabauw.xarray_combine_nested(met_list)
+tower_ds = read_cabauw.xarray_combine_nested(tower_list)
+surf_ds = read_cabauw.xarray_combine_nested(surf_list)
 
 ## Merge DataArrays
 xarray_list = [met_ds, tower_ds, surf_ds]
@@ -90,7 +90,7 @@ doppler_list  = read_cabauw.read_doppler(files)
 doppler_list_0 = doppler_list[0]
 
 ## Combine Nested  DataArrays from Lists of Dictionaries
-doppler_ds = read_cabauw.xarray_unlike(doppler_list)
+doppler_ds = read_cabauw.xarray_combine_nested(doppler_list)
 
 
 ## Create a directory to save DataArray (.zarr) file
